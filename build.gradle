@@ -7,7 +7,7 @@ plugins {
 
 sonarqube {
     properties {
-        property 'sonar.projectKey', 'IsmaTor_GlucoseRegister'
+        property 'sonar.projectKey', 'IsmaTor_GlucoseRegisterApp'
         property 'sonar.organization', 'ismator'
         property 'sonar.host.url', 'https://sonarcloud.io'
     }
