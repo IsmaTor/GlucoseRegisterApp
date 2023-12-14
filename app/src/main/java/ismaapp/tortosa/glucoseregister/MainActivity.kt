@@ -7,9 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -84,7 +84,7 @@ fun GlucoseMeasurementScreen() {
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Icon(Icons.Default.Send, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Registrar")
             }
