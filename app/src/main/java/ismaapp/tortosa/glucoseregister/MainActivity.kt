@@ -22,22 +22,54 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.DarkGray
-                ) {
-                    GlucoseMeasurementScreen()
-                }
+                LoadingScreen(onLoadingComplete = {
+                    setContent {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color.DarkGray
+                        ) {
+                            GlucoseMeasurementScreen()
+                        }
+                    }
+                })
             }
         }
     }
+}
+
+@Composable
+fun LoadingScreen(onLoadingComplete: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Cargando...", color = Color.White, fontSize = 18.sp)
+
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(36.dp),
+                color = Color.White
+            )
+        }
+    }
+
+    onLoadingComplete()
 }
 
 @Composable
@@ -53,7 +85,7 @@ fun GlucoseMeasurementScreen() {
             .fillMaxSize()
             .padding(100.dp)
     ) {
-        Text( //text = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(currentDate.value),
+        Text(
             "Indique la medición:",
             style = TextStyle(color = Color.White)
         )
