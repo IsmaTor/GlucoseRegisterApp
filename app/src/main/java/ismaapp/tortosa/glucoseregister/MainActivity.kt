@@ -1,9 +1,7 @@
 package ismaapp.tortosa.glucoseregister
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -26,26 +24,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-
-class GlucoseRepository(private val database: SQLiteDatabase) {
-    fun insertGlucoseMeasurement(glucoseValue: Float) {
-        Log.d("GlucoseRepository", "Inserting glucose measurement: " + glucoseValue);
-        val date = DateUtils.getFormattedDate()
-
-        val values = ContentValues().apply {
-            put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue)
-            put(GlucoseDBHelper.COLUMN_DATE, date)
-        }
-
-        val newRowId = database.insert(GlucoseDBHelper.TABLE_NAME, null, values)
-
-        if (newRowId != -1L) {
-            Log.d("GlucoseRepository", "Registro insertado correctamente, ID: $newRowId")
-        } else {
-            Log.e("GlucoseRepository", "Error al insertar el registro en la base de datos.")
-        }
-    }
-}
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
