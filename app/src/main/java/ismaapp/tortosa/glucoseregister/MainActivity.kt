@@ -1,6 +1,9 @@
 package ismaapp.tortosa.glucoseregister
 
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -20,13 +23,38 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+
+class GlucoseRepository(private val database: SQLiteDatabase) {
+    fun insertGlucoseMeasurement(glucoseValue: Float) {
+        Log.d("GlucoseRepository", "Inserting glucose measurement: " + glucoseValue);
+        val date = DateUtils.getFormattedDate()
+
+        val values = ContentValues().apply {
+            put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue)
+            put(GlucoseDBHelper.COLUMN_DATE, date)
+        }
+
+        val newRowId = database.insert(GlucoseDBHelper.TABLE_NAME, null, values)
+
+        if (newRowId != -1L) {
+            Log.d("GlucoseRepository", "Registro insertado correctamente, ID: $newRowId")
+        } else {
+            Log.e("GlucoseRepository", "Error al insertar el registro en la base de datos.")
+        }
+    }
+}
 class MainActivity : ComponentActivity() {
+    private lateinit var databaseGlucose: SQLiteDatabase
+    private lateinit var glucoseRepository: GlucoseRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        databaseGlucose = GlucoseDBHelper(this).writableDatabase
+        glucoseRepository = GlucoseRepository(databaseGlucose)
+
         setContent {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
@@ -35,14 +63,20 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxSize(),
                             color = Color.DarkGray
                         ) {
-                            GlucoseMeasurementScreen()
+                            GlucoseMeasurementScreen(glucoseRepository)
                         }
                     }
                 })
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        databaseGlucose.close()
+    }
 }
+
 
 @Composable
 fun LoadingScreen(onLoadingComplete: () -> Unit) {
@@ -69,11 +103,12 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
         }
     }
 
+
     onLoadingComplete()
 }
 
 @Composable
-fun GlucoseMeasurementScreen() {
+fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
     var glucoseValue by remember { mutableStateOf(0f) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -118,6 +153,8 @@ fun GlucoseMeasurementScreen() {
         ) {
             Button(
                 onClick = {
+                    // Insertar medición en la base de datos
+                    glucoseRepository.insertGlucoseMeasurement(glucoseValue)
                     if (glucoseValue >= 80 && glucoseValue <= 120) {
                         isMeasurementSuccessful = true
                         showMessage = true
@@ -180,12 +217,5 @@ fun GlucoseMeasurementScreen() {
         )
 
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GlucoseMeasurementScreenPreview() {
-    MaterialTheme {
-        GlucoseMeasurementScreen()
-    }
 }
