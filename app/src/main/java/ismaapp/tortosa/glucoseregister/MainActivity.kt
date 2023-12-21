@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -20,9 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
@@ -37,11 +44,19 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = Color.DarkGray
+                        val navController = rememberNavController()
+
+                        NavHost(
+                            navController = navController,
+                            startDestination = "glucoseMeasurement"
                         ) {
-                            GlucoseMeasurementScreen(glucoseRepository)
+                            composable("glucoseMeasurement") {
+                                GlucoseMeasurementScreen(glucoseRepository, navController)
+                            }
+                            composable("historial") {
+                                val glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
+                                GlucoseHistoryScreen(glucoseMeasurements)
+                            }
                         }
                     }
                 })
@@ -86,7 +101,7 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
 }
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
+fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController: NavController) {
     var glucoseValue by remember { mutableStateOf(0f) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -155,6 +170,10 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
             Button(
                 onClick = {
                 //lógica para código de estadísticas.
+                   glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
+                    navController.navigate("historial") {
+                        launchSingleTop = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
                     .padding(4.dp)
@@ -196,4 +215,26 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
 
     }
 
+
 }
+
+@Composable
+fun GlucoseHistoryScreen(glucoseMeasurements: List<GlucoseMeasurement>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("Historial de Glucosa", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+
+        LazyColumn {
+            items(glucoseMeasurements.sortedByDescending { it.date }) { measurement ->
+                Text("ID: ${measurement.id}, Glucosa: ${measurement.glucoseValue}, Fecha: ${measurement.date}")
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+
+
