@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
+    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,18 +45,24 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
-                        val navController = rememberNavController()
 
-                        NavHost(
-                            navController = navController,
-                            startDestination = "glucoseMeasurement"
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color.DarkGray
                         ) {
-                            composable("glucoseMeasurement") {
-                                GlucoseMeasurementScreen(glucoseRepository, navController)
-                            }
-                            composable("historial") {
-                                val glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
-                                GlucoseHistoryScreen(glucoseMeasurements)
+                            val navController = rememberNavController()
+
+                            NavHost(
+                                navController = navController,
+                                startDestination = "glucoseMeasurement"
+                            ) {
+                                composable("glucoseMeasurement") {
+                                    GlucoseMeasurementScreen(glucoseRepository, navController)
+                                }
+                                composable("historial") {
+                                    val glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
+                                    GlucoseHistoryScreen(glucoseMeasurements)
+                                }
                             }
                         }
                     }
@@ -63,6 +70,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -123,16 +131,22 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
         var message by remember { mutableStateOf("") }
 
         OutlinedTextField(
-            value = glucoseValue.toString(),
-            onValueChange = {
+            value = glucoseValue.takeIf { it != 0f }?.toString() ?: "",
+            onValueChange = { newValue ->
                 isError = false
-                glucoseValue = it.toFloatOrNull() ?: 0f
+
+                // Permitir solo un punto decimal y números
+                val regex = Regex("""^-?\d*\.?\d*$""")
+                if (newValue.isBlank() || regex.matches(newValue)) {
+                    glucoseValue = newValue.toFloatOrNull() ?: 0f
+                }
             },
             label = { Text("Ingrese el valor de glucosa", modifier = Modifier.align(Alignment.CenterHorizontally)) },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number
+                keyboardType = KeyboardType.NumberPassword
             ),
             isError = isError,
+
             textStyle = TextStyle(color = Color.White)
         )
 
@@ -148,6 +162,8 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
                 onClick = {
                     // Insertar medición en la base de datos
                     glucoseRepository.insertGlucoseMeasurement(glucoseValue)
+
+                    //ejemplo para más adelante añadir un registro correcto
                     if (glucoseValue >= 80 && glucoseValue <= 120) {
                         isMeasurementSuccessful = true
                         showMessage = true
