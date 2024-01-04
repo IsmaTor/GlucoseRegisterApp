@@ -108,16 +108,22 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
         var message by remember { mutableStateOf("") }
 
         OutlinedTextField(
-            value = glucoseValue.toString(),
-            onValueChange = {
+            value = glucoseValue.takeIf { it != 0f }?.toString() ?: "",
+            onValueChange = { newValue ->
                 isError = false
-                glucoseValue = it.toFloatOrNull() ?: 0f
+
+                // Permitir solo un punto decimal y números
+                val regex = Regex("""^-?\d*\.?\d*$""")
+                if (newValue.isBlank() || regex.matches(newValue)) {
+                    glucoseValue = newValue.toFloatOrNull() ?: 0f
+                }
             },
             label = { Text("Ingrese el valor de glucosa", modifier = Modifier.align(Alignment.CenterHorizontally)) },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number
+                keyboardType = KeyboardType.NumberPassword
             ),
             isError = isError,
+
             textStyle = TextStyle(color = Color.White)
         )
 
@@ -133,6 +139,8 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
                 onClick = {
                     // Insertar medición en la base de datos
                     glucoseRepository.insertGlucoseMeasurement(glucoseValue)
+
+                    //ejemplo para más adelante añadir un registro correcto
                     if (glucoseValue >= 80 && glucoseValue <= 120) {
                         isMeasurementSuccessful = true
                         showMessage = true

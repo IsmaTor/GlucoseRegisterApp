@@ -23,9 +23,9 @@ public class GlucoseRepository {
         long newRowId = database.insert(GlucoseDBHelper.TABLE_NAME, null, values);
 
         if (newRowId != -1) {
-            Log.d(LOG_NAME, "Registro insertado correctamente, ID: " + newRowId);
+            Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId);
         } else {
-            Log.e(LOG_NAME, "Error al insertar el registro en la base de datos.");
+            Log.e(LOG_NAME, "Error inserting register into database.");
         }
     }
 }
