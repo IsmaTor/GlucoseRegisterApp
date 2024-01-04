@@ -69,10 +69,20 @@ public class GlucoseRepository {
         long newRowId = database.insert(GlucoseDBHelper.TABLE_NAME, null, values);
 
         if (newRowId != -1) {
-            Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId);
+            Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId +  "date: " + date );
         } else {
             Log.e(LOG_NAME, "Error inserting register into database.");
         }
     }
+
+    public void deleteAllGlucoseMeasurements() {
+        try {
+            database.delete(GlucoseDBHelper.TABLE_NAME, null, null);
+            Log.d(LOG_NAME, "All glucose measurements deleted successfully.");
+        } catch (SQLiteException e) {
+            Log.e(LOG_NAME, "Error deleting all glucose measurements.", e);
+        }
+    }
+
 }
 

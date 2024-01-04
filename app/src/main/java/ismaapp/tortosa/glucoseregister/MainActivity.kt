@@ -34,7 +34,7 @@ import androidx.navigation.compose.rememberNavController
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
-    
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +60,7 @@ class MainActivity : ComponentActivity() {
                                     GlucoseMeasurementScreen(glucoseRepository, navController)
                                 }
                                 composable("historial") {
-                                    val glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
-                                    GlucoseHistoryScreen(glucoseMeasurements)
+                                    GlucoseHistoryScreen(glucoseRepository)
                                 }
                             }
                         }
@@ -103,7 +102,6 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
             )
         }
     }
-
 
     onLoadingComplete()
 }
@@ -185,8 +183,8 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
             }
             Button(
                 onClick = {
-                //lógica para código de estadísticas.
-                   glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
+                    //lógica para código de estadísticas.
+                    glucoseRepository.getPaginatedGlucoseMeasurements(0, 20)
                     navController.navigate("historial") {
                         launchSingleTop = true
                     }
@@ -228,14 +226,17 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
                 .padding(16.dp)
                 .background(Color.LightGray)
         )
-
     }
-
-
 }
 
 @Composable
-fun GlucoseHistoryScreen(glucoseMeasurements: List<GlucoseMeasurement>) {
+fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository) {
+    var pageNumber by remember { mutableStateOf(1) }
+    var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
+
+    // Obtener las primeras mediciones al cargar la pantalla
+    glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(pageNumber, 20)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -243,11 +244,45 @@ fun GlucoseHistoryScreen(glucoseMeasurements: List<GlucoseMeasurement>) {
     ) {
         Text("Historial de Glucosa", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold))
 
+        // Botón para borrar todas las mediciones
+        Button(
+            onClick = {
+                // Lógica para borrar todas las mediciones
+                glucoseRepository.deleteAllGlucoseMeasurements()
+                // Limpiar la lista local de mediciones
+                glucoseMeasurements = emptyList()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .heightIn(min = 48.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Text("Borrar Todas las Mediciones")
+        }
+
         LazyColumn {
-            items(glucoseMeasurements.sortedByDescending { it.date }) { measurement ->
+            items(glucoseMeasurements.sortedByDescending { it.id }) { measurement ->
                 Text("ID: ${measurement.id}, Glucosa: ${measurement.glucoseValue}, Fecha: ${measurement.date}")
                 Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+
+        // Botón para cargar más mediciones
+        Button(
+            onClick = {
+                // Incrementar el número de página y cargar más mediciones
+                pageNumber++
+                val moreMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(pageNumber, 20)
+                glucoseMeasurements = moreMeasurements + glucoseMeasurements
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .heightIn(min = 48.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Text("Cargar más")
         }
     }
 }
