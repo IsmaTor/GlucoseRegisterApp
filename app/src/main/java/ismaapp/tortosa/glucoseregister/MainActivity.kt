@@ -5,28 +5,43 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,17 +52,36 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
+
                         Surface(
                             modifier = Modifier.fillMaxSize(),
                             color = Color.DarkGray
                         ) {
-                            GlucoseMeasurementScreen(glucoseRepository)
+                            val navController = rememberNavController()
+
+                            NavHost(
+                                navController = navController,
+                                startDestination = "glucoseMeasurement"
+                            ) {
+                                composable("glucoseMeasurement") {
+                                    GlucoseMeasurementScreen(glucoseRepository, navController)
+                                }
+                                composable("historial/{pageNumber}") { backStackEntry ->
+                                    val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
+                                    GlucoseHistoryScreen(glucoseRepository, pageNumber, navController)
+                                }
+                                composable("historialPaginado/{pageNumber}") { backStackEntry ->
+                                    val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
+                                    GlucoseHistoryScreen(glucoseRepository, pageNumber, navController)
+                                }
+                            }
                         }
                     }
                 })
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -81,12 +115,11 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
         }
     }
 
-
     onLoadingComplete()
 }
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
+fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController: NavController) {
     var glucoseValue by remember { mutableStateOf(0f) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -120,7 +153,7 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
             },
             label = { Text("Ingrese el valor de glucosa", modifier = Modifier.align(Alignment.CenterHorizontally)) },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.NumberPassword
+                keyboardType = KeyboardType.Decimal
             ),
             isError = isError,
 
@@ -162,7 +195,11 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
             }
             Button(
                 onClick = {
-                //lógica para código de estadísticas.
+                    //lógica para código de estadísticas.
+                    glucoseRepository.getPaginatedGlucoseMeasurements(0, 20, true)
+                    navController.navigate("historial/1") {
+                        launchSingleTop = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
                     .padding(4.dp)
@@ -201,7 +238,144 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository) {
                 .padding(16.dp)
                 .background(Color.LightGray)
         )
-
     }
-
 }
+
+@Composable
+fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository, pageNumber: Int, navController: NavController) {
+    var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
+    var orderByLatest by remember { mutableStateOf(true) }
+    var orderByDateDescending by remember { mutableStateOf(true) }
+    val GranateColor = Color(0xFF800000)
+
+    val pageSize = 20
+    val startIndex = (pageNumber - 1) * pageSize
+    val endIndex = startIndex + pageSize
+
+    // Obtener las mediciones al cargar la página actual
+    glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(startIndex, endIndex, orderByLatest)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("Historial de Glucosa", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold), color = Color.White)
+
+
+
+        // Botón para borrar todas las mediciones
+        Button(
+            onClick = {
+                // Lógica para borrar todas las mediciones
+                glucoseRepository.deleteAllGlucoseMeasurements()
+                // Limpiar la lista local de mediciones
+                glucoseMeasurements = emptyList()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp)
+                .heightIn(min = 24.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(color = GranateColor)
+        ) {
+            Text("Borrar Todas las Mediciones", color = GranateColor)
+        }
+
+        // Botón para cargar más mediciones
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = {
+                    // Navegar a la página anterior con la página anterior
+                    if (pageNumber > 1) {
+                        navController.navigate("historialPaginado/${pageNumber - 1}")
+                    }
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 24.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Text("Anterior")
+            }
+
+            Button(
+                onClick = {
+                    // Navegar a la siguiente página con la página siguiente
+                    navController.navigate("historialPaginado/${pageNumber + 1}")
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 24.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Text("Siguiente")
+            }
+        }
+
+        // Tabla para mostrar las mediciones
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            // Encabezado de la tabla
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray)
+                    .padding(4.dp)
+            ) {
+                // Botón de ordenamiento para Fecha
+                Text(
+                    text = "Fecha",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(4.dp)
+                        .clickable {
+                            // Lógica para el clic en "Fecha" (si es necesario)
+                            orderByLatest = !orderByLatest
+                            orderByDateDescending = !orderByDateDescending
+                            // Actualizar la lista al cambiar la orientación de la ordenación
+                            glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(
+                                startIndex,
+                                endIndex,
+                                orderByLatest
+                            )
+                        },
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        color = LocalContentColor.current // para mantener el color del tema
+                    )
+                )
+
+                Text("ID", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Registro", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            }
+
+            // Filas de la tabla
+            glucoseMeasurements.forEach { measurement ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                ) {
+                    Text(measurement.date, modifier = Modifier.weight(1f), color = Color.White)
+                    Text(measurement.id.toString(), modifier = Modifier.weight(1f), color = Color.White)
+                    Text(measurement.glucoseValue.toString(), modifier = Modifier.weight(1f), color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
