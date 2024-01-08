@@ -7,27 +7,19 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,16 +29,24 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement
+import ismaapp.tortosa.glucoseregister.helpers.GlucoseDBHelper
+import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
+import ismaapp.tortosa.glucoseregister.services.GlucoseServicesImp
+import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.utils.DateUtils
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
-
+    private lateinit var glucoseService: IGlucoseServices
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         databaseGlucose = GlucoseDBHelper(this).writableDatabase
         glucoseRepository = GlucoseRepository(databaseGlucose)
+        glucoseService = GlucoseServicesImp(glucoseRepository)
 
         setContent {
             MaterialTheme {
@@ -64,15 +64,15 @@ class MainActivity : ComponentActivity() {
                                 startDestination = "glucoseMeasurement"
                             ) {
                                 composable("glucoseMeasurement") {
-                                    GlucoseMeasurementScreen(glucoseRepository, navController)
+                                    GlucoseMeasurementScreen(glucoseService, navController)
                                 }
                                 composable("historial/{pageNumber}") { backStackEntry ->
                                     val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(glucoseRepository, pageNumber, navController)
+                                    GlucoseHistoryScreen(glucoseService, pageNumber, navController)
                                 }
                                 composable("historialPaginado/{pageNumber}") { backStackEntry ->
                                     val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(glucoseRepository, pageNumber, navController)
+                                    GlucoseHistoryScreen(glucoseService, pageNumber, navController)
                                 }
                             }
                         }
@@ -119,7 +119,7 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
 }
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController: NavController) {
+fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: NavController) {
     var glucoseValue by remember { mutableStateOf(0f) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -171,7 +171,7 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
             Button(
                 onClick = {
                     // Insertar medición en la base de datos
-                    glucoseRepository.insertGlucoseMeasurement(glucoseValue)
+                    glucoseService.insertGlucoseMeasurement(glucoseValue)
 
                     //ejemplo para más adelante añadir un registro correcto
                     if (glucoseValue >= 80 && glucoseValue <= 120) {
@@ -196,7 +196,7 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
             Button(
                 onClick = {
                     //lógica para código de estadísticas.
-                    glucoseRepository.getPaginatedGlucoseMeasurements(0, 20, true)
+                    glucoseService.getPaginatedGlucoseMeasurements(0, 20, true)
                     navController.navigate("historial/1") {
                         launchSingleTop = true
                     }
@@ -242,7 +242,7 @@ fun GlucoseMeasurementScreen(glucoseRepository: GlucoseRepository, navController
 }
 
 @Composable
-fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository, pageNumber: Int, navController: NavController) {
+fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navController: NavController) {
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     var orderByLatest by remember { mutableStateOf(true) }
     var orderByDateDescending by remember { mutableStateOf(true) }
@@ -253,7 +253,7 @@ fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository, pageNumber: Int, 
     val endIndex = startIndex + pageSize
 
     // Obtener las mediciones al cargar la página actual
-    glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(startIndex, endIndex, orderByLatest)
+    glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(startIndex, endIndex, orderByLatest)
 
     Column(
         modifier = Modifier
@@ -268,7 +268,7 @@ fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository, pageNumber: Int, 
         Button(
             onClick = {
                 // Lógica para borrar todas las mediciones
-                glucoseRepository.deleteAllGlucoseMeasurements()
+                glucoseService.deleteAllGlucoseMeasurements()
                 // Limpiar la lista local de mediciones
                 glucoseMeasurements = emptyList()
             },
@@ -342,7 +342,7 @@ fun GlucoseHistoryScreen(glucoseRepository: GlucoseRepository, pageNumber: Int, 
                             orderByLatest = !orderByLatest
                             orderByDateDescending = !orderByDateDescending
                             // Actualizar la lista al cambiar la orientación de la ordenación
-                            glucoseMeasurements = glucoseRepository.getPaginatedGlucoseMeasurements(
+                            glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(
                                 startIndex,
                                 endIndex,
                                 orderByLatest

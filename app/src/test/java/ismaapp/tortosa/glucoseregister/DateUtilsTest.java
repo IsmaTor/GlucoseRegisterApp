@@ -9,6 +9,8 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import ismaapp.tortosa.glucoseregister.utils.DateUtils;
+
 public class DateUtilsTest {
 
     @Test
