@@ -53,7 +53,7 @@ public class GlucoseServicesImp implements IGlucoseServices{
                 } while (cursor.moveToNext());
             }
         } catch (SQLiteException e) {
-            e.printStackTrace();
+            Log.e(LOG_NAME, "Error executing database query", e);
         }
         return glucoseMeasurements;
     }
