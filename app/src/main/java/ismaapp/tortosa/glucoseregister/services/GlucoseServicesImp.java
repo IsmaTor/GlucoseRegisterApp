@@ -17,6 +17,7 @@ public class GlucoseServicesImp implements IGlucoseServices{
 
     private final GlucoseRepository glucoseRepository;
     private static final String LOG_NAME = "GlucoseRepository";
+    private boolean lastInsertSuccess = false;
 
     public GlucoseServicesImp(GlucoseRepository glucoseRepository) {
         this.glucoseRepository = glucoseRepository;
@@ -59,20 +60,30 @@ public class GlucoseServicesImp implements IGlucoseServices{
 
     @Override
     public void insertGlucoseMeasurement(float glucoseValue) {
-        Log.d(LOG_NAME, "Inserting glucose measurement: " + glucoseValue);
-        String date = DateUtils.getFormattedDate();
+        try {
+            Log.d(LOG_NAME, "Inserting glucose measurement: " + glucoseValue);
+            String date = DateUtils.getFormattedDate();
+            ContentValues values = new ContentValues();
+            values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
+            values.put(GlucoseDBHelper.COLUMN_DATE, date);
 
-        ContentValues values = new ContentValues();
-        values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
-        values.put(GlucoseDBHelper.COLUMN_DATE, date);
+            long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
 
-        long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
+            lastInsertSuccess = newRowId != -1;
 
-        if (newRowId != -1) {
-            Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId +  "date: " + date );
-        } else {
-            Log.e(LOG_NAME, "Error inserting register into database.");
-        }
+            if (lastInsertSuccess) {
+                Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId + "date: " + date);
+            } else {
+                Log.e(LOG_NAME, "Error inserting register into database.");
+            }
+        }catch (Exception e) {
+                Log.e(LOG_NAME, "Exception while inserting glucose measurement: " + e.getMessage());
+            }
+    }
+
+    @Override
+    public boolean isInsertSuccess() {
+        return lastInsertSuccess;
     }
 
     @Override
