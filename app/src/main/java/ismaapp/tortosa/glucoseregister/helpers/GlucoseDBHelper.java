@@ -1,4 +1,4 @@
-package ismaapp.tortosa.glucoseregister;
+package ismaapp.tortosa.glucoseregister.helpers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,11 +22,10 @@ public class GlucoseDBHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-    private final Context context;
 
     public GlucoseDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.context = context;
+
     }
 
     @Override
@@ -41,4 +40,3 @@ public class GlucoseDBHelper extends SQLiteOpenHelper {
     }
 
 }
-

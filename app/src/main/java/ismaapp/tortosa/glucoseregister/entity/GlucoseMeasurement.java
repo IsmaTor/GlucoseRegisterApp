@@ -1,9 +1,9 @@
-package ismaapp.tortosa.glucoseregister;
+package ismaapp.tortosa.glucoseregister.entity;
 
 public class GlucoseMeasurement {
-    private long id;
-    private double glucoseValue;
-    private String date;
+    private final long id;
+    private final double glucoseValue;
+    private final String date;
 
     public GlucoseMeasurement(long id, double glucoseValue, String date) {
         this.id = id;
