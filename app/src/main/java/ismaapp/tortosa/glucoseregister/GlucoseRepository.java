@@ -17,10 +17,11 @@ public class GlucoseRepository {
         this.database = database;
     }
 
-    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int offset, int limit) {
+    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int offset, int limit, boolean orderByLatest) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
+        String order = orderByLatest ? " DESC" : " ASC";
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
-                " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " DESC" +
+                " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + order +
                 " LIMIT " + limit + " OFFSET " + offset;
 
         Cursor cursor = null;
