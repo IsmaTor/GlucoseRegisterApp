@@ -157,11 +157,7 @@ fun GlucoseHistoryScreen(
 
             Button(
                 onClick = {
-                    // Agregar la lógica para ir al menú principal
-                    // Puedes usar el NavController para navegar a la pantalla del menú
-                    navController.navigate("menuPrincipal")
-
-
+                    navController.popBackStack("glucoseMeasurement", inclusive = false)
                 },
                 modifier = Modifier
                     .weight(0.8f)
