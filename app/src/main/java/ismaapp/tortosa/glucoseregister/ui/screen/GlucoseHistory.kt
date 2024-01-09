@@ -165,7 +165,7 @@ fun GlucoseHistoryScreen(
                     .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
-                Text("Menú")
+                Text("Home")
             }
 
             Button(
