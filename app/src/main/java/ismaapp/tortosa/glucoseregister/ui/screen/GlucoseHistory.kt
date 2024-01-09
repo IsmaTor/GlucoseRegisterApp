@@ -89,7 +89,12 @@ fun GlucoseHistoryScreen(
                 ) {
                     // Botón de ordenamiento para Fecha
                     Text(
-                        text = "Fecha",
+                        text = "   ",
+                        modifier = Modifier
+                            .weight(0.5f))
+
+                    Text(
+                        text = "FECHA",
                         modifier = Modifier
                             .weight(1f)
                             .padding(4.dp)
@@ -108,7 +113,17 @@ fun GlucoseHistoryScreen(
                         )
                     )
 
-                    Text("Registro", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(
+                        text = "REGISTRO",
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp),
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = LocalContentColor.current
+                        )
+                    )
+
                 }
                 Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.fillMaxWidth())
             }
@@ -138,6 +153,23 @@ fun GlucoseHistoryScreen(
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 Text("Anterior")
+            }
+
+            Button(
+                onClick = {
+                    // Agregar la lógica para ir al menú principal
+                    // Puedes usar el NavController para navegar a la pantalla del menú
+                    navController.navigate("menuPrincipal")
+
+
+                },
+                modifier = Modifier
+                    .weight(0.8f)
+                    .heightIn(min = 24.dp)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Text("Menú")
             }
 
             Button(
@@ -182,3 +214,6 @@ fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
         )
     }
 }
+
+
+
