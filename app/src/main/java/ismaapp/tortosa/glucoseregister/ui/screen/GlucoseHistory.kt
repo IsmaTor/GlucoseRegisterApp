@@ -5,11 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
@@ -30,13 +35,17 @@ import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
 
 @Composable
-fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navController: NavController) {
+fun GlucoseHistoryScreen(
+    glucoseService: IGlucoseServices,
+    pageNumber: Int,
+    navController: NavController
+) {
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     var orderByLatest by remember { mutableStateOf(true) }
     var orderByDateDescending by remember { mutableStateOf(true) }
 
     val darkRed = Color(0xFF800000)
-    val pageSize = 20
+    val pageSize = 12
     val startIndex = (pageNumber - 1) * pageSize
     val endIndex = startIndex + pageSize
 
@@ -48,7 +57,11 @@ fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navC
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Historial de Glucosa", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold), color = Color.White)
+        Text(
+            "Historial de Glucosa",
+            style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+            color = Color.White
+        )
 
         // Botón para borrar todas las mediciones
         Button(
@@ -58,7 +71,7 @@ fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navC
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp)
+                .padding(8.dp)
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = darkRed)
@@ -66,10 +79,50 @@ fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navC
             Text("Borrar Todas las Mediciones", color = darkRed)
         }
 
+        LazyColumn {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.LightGray)
+                        .padding(4.dp)
+                ) {
+                    // Botón de ordenamiento para Fecha
+                    Text(
+                        text = "Fecha",
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
+                            .clickable {
+                                orderByLatest = !orderByLatest
+                                orderByDateDescending = !orderByDateDescending
+                                glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(
+                                    startIndex,
+                                    endIndex,
+                                    orderByLatest
+                                )
+                            },
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = LocalContentColor.current
+                        )
+                    )
+
+                    Text("Registro", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                }
+                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.fillMaxWidth())
+            }
+
+            itemsIndexed(glucoseMeasurements) { index, measurement ->
+                GlucoseRow(startIndex + index + 1, measurement)
+                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.fillMaxWidth())
+            }
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
@@ -81,6 +134,7 @@ fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navC
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 24.dp)
+                    .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 Text("Anterior")
@@ -93,59 +147,38 @@ fun GlucoseHistoryScreen(glucoseService: IGlucoseServices, pageNumber: Int, navC
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 24.dp)
+                    .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 Text("Siguiente")
             }
         }
+    }
+}
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.LightGray)
-                    .padding(4.dp)
-            ) {
-                // Botón de ordenamiento para Fecha
-                Text(
-                    text = "Fecha",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(4.dp)
-                        .clickable {
-                            orderByLatest = !orderByLatest
-                            orderByDateDescending = !orderByDateDescending
-                            glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(
-                                startIndex,
-                                endIndex,
-                                orderByLatest
-                            )
-                        },
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        color = LocalContentColor.current
-                    )
-                )
-
-                Text("ID", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text("Registro", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            }
-
-            glucoseMeasurements.forEach { measurement ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                ) {
-                    Text(measurement.date, modifier = Modifier.weight(1f), color = Color.White)
-                    Text(measurement.id.toString(), modifier = Modifier.weight(1f), color = Color.White)
-                    Text(measurement.glucoseValue.toString(), modifier = Modifier.weight(1f), color = Color.White)
-                }
-            }
-        }
+@Composable
+fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            positionNumber.toString(),
+            modifier = Modifier.weight(0.4f), //Modificador del peso de posición
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.width(8.dp)) //Modificador del espacio entre posición y Fecha
+        Text(
+            measurement.date,
+            modifier = Modifier.weight(2f), //Modificador del peso de Fecha
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.width(16.dp)) //Modificador del espacio entre Fecha y Registro
+        Text(
+            measurement.glucoseValue.toString(),
+            modifier = Modifier.weight(1.5f), //Modificador del peso de Registro
+            color = Color.White
+        )
     }
 }
