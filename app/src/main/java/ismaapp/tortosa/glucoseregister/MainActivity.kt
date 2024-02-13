@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
@@ -23,6 +26,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
     private lateinit var glucoseService: IGlucoseServices
+
+    private var orderByLatest by mutableStateOf(true)
+    private var orderByDateDescending by mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,11 +57,27 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("historial/{pageNumber}") { backStackEntry ->
                                     val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(glucoseService, pageNumber, navController)
+                                    GlucoseHistoryScreen(
+                                        glucoseService,
+                                        pageNumber,
+                                        navController,
+                                        orderByLatest,
+                                        orderByDateDescending,
+                                        onOrderByLatestChanged = { orderByLatest = it },
+                                        onOrderByDateDescendingChanged = { orderByDateDescending = it }
+                                    )
                                 }
                                 composable("historialPaginado/{pageNumber}") { backStackEntry ->
                                     val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(glucoseService, pageNumber, navController)
+                                    GlucoseHistoryScreen(
+                                        glucoseService,
+                                        pageNumber,
+                                        navController,
+                                        orderByLatest,
+                                        orderByDateDescending,
+                                        onOrderByLatestChanged = { orderByLatest = it },
+                                        onOrderByDateDescendingChanged = { orderByDateDescending = it }
+                                    )
                                 }
                             }
                         }

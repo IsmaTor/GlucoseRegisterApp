@@ -38,13 +38,14 @@ import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
 fun GlucoseHistoryScreen(
     glucoseService: IGlucoseServices,
     pageNumber: Int,
-    navController: NavController
+    navController: NavController,
+    orderByLatest: Boolean,
+    orderByDateDescending: Boolean,
+    onOrderByLatestChanged: (Boolean) -> Unit,
+    onOrderByDateDescendingChanged: (Boolean) -> Unit
 ) {
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
-    var orderByLatest by remember { mutableStateOf(true) }
-    var orderByDateDescending by remember { mutableStateOf(true) }
-
-    val darkRed = Color(0xFF800000)
+    var darkRed by remember { mutableStateOf(Color(0xFF800000)) }
     val pageSize = 12
     val startIndex = (pageNumber - 1) * pageSize
     val endIndex = startIndex + pageSize
@@ -99,13 +100,8 @@ fun GlucoseHistoryScreen(
                             .weight(1f)
                             .padding(4.dp)
                             .clickable {
-                                orderByLatest = !orderByLatest
-                                orderByDateDescending = !orderByDateDescending
-                                glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(
-                                    startIndex,
-                                    endIndex,
-                                    orderByLatest
-                                )
+                                onOrderByLatestChanged(!orderByLatest)
+                                onOrderByDateDescendingChanged(!orderByDateDescending)
                             },
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
@@ -183,6 +179,7 @@ fun GlucoseHistoryScreen(
         }
     }
 }
+
 
 @Composable
 fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
