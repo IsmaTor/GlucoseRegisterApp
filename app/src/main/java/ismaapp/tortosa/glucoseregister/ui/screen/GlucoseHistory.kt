@@ -41,9 +41,9 @@ fun GlucoseHistoryScreen(
     pageNumber: Int,
     navController: NavController,
     orderByLatest: Boolean,
-    orderByDateDescending: Boolean,
+    orderByOldest: Boolean,
     onOrderByLatestChanged: (Boolean) -> Unit,
-    onOrderByDateDescendingChanged: (Boolean) -> Unit
+    onOrderByOldestChanged: (Boolean) -> Unit
 ) {
 
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
@@ -103,7 +103,7 @@ fun GlucoseHistoryScreen(
                             .padding(4.dp)
                             .clickable {
                                 onOrderByLatestChanged(!orderByLatest)
-                                onOrderByDateDescendingChanged(!orderByDateDescending)
+                                onOrderByOldestChanged(!orderByOldest)
                             },
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
@@ -183,7 +183,6 @@ fun GlucoseHistoryScreen(
     }
 }
 
-
 @Composable
 fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
     Row(
@@ -210,6 +209,3 @@ fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
         )
     }
 }
-
-
-

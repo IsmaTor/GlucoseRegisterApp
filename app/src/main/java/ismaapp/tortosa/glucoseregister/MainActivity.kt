@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var glucoseService: IGlucoseServices
 
     private var orderByLatest by mutableStateOf(true)
-    private var orderByDateDescending by mutableStateOf(true)
+    private var orderByOldest by mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,9 +62,9 @@ class MainActivity : ComponentActivity() {
                                         pageNumber,
                                         navController,
                                         orderByLatest,
-                                        orderByDateDescending,
+                                        orderByOldest,
                                         onOrderByLatestChanged = { orderByLatest = it },
-                                        onOrderByDateDescendingChanged = { orderByDateDescending = it }
+                                        onOrderByOldestChanged = { orderByOldest = it }
                                     )
                                 }
                                 composable("historialPaginado/{pageNumber}") { backStackEntry ->
@@ -74,9 +74,9 @@ class MainActivity : ComponentActivity() {
                                         pageNumber,
                                         navController,
                                         orderByLatest,
-                                        orderByDateDescending,
+                                        orderByOldest,
                                         onOrderByLatestChanged = { orderByLatest = it },
-                                        onOrderByDateDescendingChanged = { orderByDateDescending = it }
+                                        onOrderByOldestChanged = { orderByOldest = it }
                                     )
                                 }
                             }
