@@ -24,12 +24,17 @@ public class GlucoseServicesImp implements IGlucoseServices{
     }
 
     @Override
-    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int offset, int limit, boolean orderByLatest) {
+    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
         String order = orderByLatest ? " DESC" : " ASC";
+        int offset = (pageNumber - 1) * limit;
+        Log.d(LOG_NAME, "Offset calculated: " + offset); // Logging the calculated offset
+
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
                 " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + order +
                 " LIMIT " + limit + " OFFSET " + offset;
+
+        Log.d(LOG_NAME, "Executing query: " + query); // Log para la consulta SQL
 
         try (Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null)) {
 
@@ -51,10 +56,13 @@ public class GlucoseServicesImp implements IGlucoseServices{
                     }
 
                 } while (cursor.moveToNext());
+            } else {
+                Log.d(LOG_NAME, "No rows found in cursor."); // Log si no se encuentran filas en el cursor
             }
         } catch (SQLiteException e) {
             Log.e(LOG_NAME, "Error executing database query", e);
         }
+        Log.d(LOG_NAME, "Returning " + glucoseMeasurements.size() + " glucose measurements."); // Log para la cantidad de mediciones devueltas
         return glucoseMeasurements;
     }
 

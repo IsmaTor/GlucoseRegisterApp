@@ -1,5 +1,6 @@
 package ismaapp.tortosa.glucoseregister.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,14 +45,15 @@ fun GlucoseHistoryScreen(
     onOrderByLatestChanged: (Boolean) -> Unit,
     onOrderByDateDescendingChanged: (Boolean) -> Unit
 ) {
+
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
-    var darkRed by remember { mutableStateOf(Color(0xFF800000)) }
+    val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
     val pageSize = 12
     val startIndex = (pageNumber - 1) * pageSize
-    val endIndex = startIndex + pageSize
+    val calculatedPageNumber = (startIndex / pageSize) + 1
 
     // Obtener las mediciones al cargar la página actual
-    glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(startIndex, endIndex, orderByLatest)
+    glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(calculatedPageNumber, pageSize, orderByLatest)
 
     Column(
         modifier = Modifier
@@ -166,6 +168,7 @@ fun GlucoseHistoryScreen(
 
             Button(
                 onClick = {
+                    Log.d("MainActivity", "Navigating to next page")
                     navController.navigate("historialPaginado/${pageNumber + 1}")
                 },
                 modifier = Modifier
