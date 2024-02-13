@@ -24,9 +24,11 @@ public class GlucoseServicesImp implements IGlucoseServices{
     }
 
     @Override
-    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int offset, int limit, boolean orderByLatest) {
+    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
         String order = orderByLatest ? " DESC" : " ASC";
+        int offset = (pageNumber - 1) * limit;
+
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
                 " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + order +
                 " LIMIT " + limit + " OFFSET " + offset;
@@ -49,8 +51,9 @@ public class GlucoseServicesImp implements IGlucoseServices{
                     } else {
                         Log.e(LOG_NAME, "Column not found at cursor");
                     }
-
                 } while (cursor.moveToNext());
+            } else {
+                Log.d(LOG_NAME, "No rows found in cursor."); // Log por si no se encuentran filas en el cursor
             }
         } catch (SQLiteException e) {
             Log.e(LOG_NAME, "Error executing database query", e);
