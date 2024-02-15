@@ -42,10 +42,15 @@ fun GlucoseHistoryScreen(
     navController: NavController,
     orderByLatest: Boolean,
     orderByOldest: Boolean,
+    orderByHighestGlucose: Boolean,
+    orderByLowestGlucose: Boolean,
     onOrderByLatestChanged: (Boolean) -> Unit,
-    onOrderByOldestChanged: (Boolean) -> Unit
+    onOrderByOldestChanged: (Boolean) -> Unit,
+    onOrderByHighestGlucoseChanged: (Boolean) -> Unit,
+    onOrderByLowestGlucoseChanged: (Boolean) -> Unit
 ) {
 
+    var userSelection by remember { mutableStateOf("FECHA") }
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
     val pageSize = 12
@@ -53,7 +58,7 @@ fun GlucoseHistoryScreen(
     val calculatedPageNumber = (startIndex / pageSize) + 1
 
     // Obtener las mediciones al cargar la página actual
-    glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(calculatedPageNumber, pageSize, orderByLatest)
+    glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(calculatedPageNumber, pageSize, orderByLatest, orderByHighestGlucose, userSelection)
 
     Column(
         modifier = Modifier
@@ -102,6 +107,10 @@ fun GlucoseHistoryScreen(
                             .weight(1f)
                             .padding(4.dp)
                             .clickable {
+                                Log.d("GlucoseHistoryScreen", "FECHA clicked. orderByLatest: $orderByLatest")
+                                userSelection = "FECHA"
+                                //glucoseMeasurements = glucoseService.getPaginatedGlucoseDate(calculatedPageNumber, pageSize, !orderByLatest)
+                                Log.d("GlucoseHistoryScreen", "getPaginatedGlucoseDate called")
                                 onOrderByLatestChanged(!orderByLatest)
                                 onOrderByOldestChanged(!orderByOldest)
                             },
@@ -115,7 +124,17 @@ fun GlucoseHistoryScreen(
                         text = "REGISTRO",
                         modifier = Modifier
                             .weight(1f)
-                            .padding(4.dp),
+                            .padding(4.dp)
+                            .clickable {
+                                Log.d("GlucoseHistoryScreen", "REGISTRO clicked. orderByHighestGlucose: $orderByHighestGlucose")
+                                userSelection = "REGISTRO"
+                                //glucoseMeasurements = glucoseService.getPaginatedGlucoseValues(calculatedPageNumber, pageSize, !orderByHighestGlucose)
+                                Log.d("GlucoseHistoryScreen", "getPaginatedGlucoseValues called")
+                                onOrderByLatestChanged(false)
+                                onOrderByOldestChanged(false)
+                                onOrderByHighestGlucoseChanged(!orderByHighestGlucose)
+                                onOrderByLowestGlucoseChanged(!orderByLowestGlucose)
+                            },
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             color = LocalContentColor.current

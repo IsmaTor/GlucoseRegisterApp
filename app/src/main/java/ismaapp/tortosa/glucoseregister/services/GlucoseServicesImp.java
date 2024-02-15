@@ -18,23 +18,43 @@ public class GlucoseServicesImp implements IGlucoseServices{
     private final GlucoseRepository glucoseRepository;
     private static final String LOG_NAME = "GlucoseRepository";
     private boolean lastInsertSuccess = false;
+    private String lastUserSelection = null;
+    private boolean lastOrderByLatest = false;
+    private boolean lastOrderByHighestGlucose = false;
+
 
     public GlucoseServicesImp(GlucoseRepository glucoseRepository) {
         this.glucoseRepository = glucoseRepository;
     }
 
     @Override
-    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest) {
+    public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
-        String order = orderByLatest ? " DESC" : " ASC";
         int offset = (pageNumber - 1) * limit;
 
+        // Si el usuario no ha cambiado la selección, usamos la última selección y ordenamiento
+        if (userSelection.equals(lastUserSelection)) {
+            orderByLatest = lastOrderByLatest;
+            orderByHighestGlucose = lastOrderByHighestGlucose;
+        } else {
+            // Guardamos la última selección y ordenamiento del usuario
+            lastUserSelection = userSelection;
+            lastOrderByLatest = orderByLatest;
+            lastOrderByHighestGlucose = orderByHighestGlucose;
+        }
+
+        String order = " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " ASC";
+
+        if (userSelection.equals("FECHA")) {
+            order = " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + ((orderByLatest) ? " DESC" : " ASC");
+        } else if (userSelection.equals("REGISTRO")) {
+            order = " ORDER BY " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + ((orderByHighestGlucose) ? " DESC" : " ASC");
+        }
+
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
-                " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + order +
-                " LIMIT " + limit + " OFFSET " + offset;
+                order + " LIMIT " + limit + " OFFSET " + offset;
 
         try (Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null)) {
-
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     int idIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
@@ -53,11 +73,14 @@ public class GlucoseServicesImp implements IGlucoseServices{
                     }
                 } while (cursor.moveToNext());
             } else {
-                Log.d(LOG_NAME, "No rows found in cursor."); // Log por si no se encuentran filas en el cursor
+                Log.d(LOG_NAME, "No rows found in cursor."); // Registro de depuración para cuando no se encuentran filas en el cursor
             }
         } catch (SQLiteException e) {
             Log.e(LOG_NAME, "Error executing database query", e);
         }
+
+        Log.d("Glucose Measurements", glucoseMeasurements.toString()); // Registro de depuración para las mediciones de glucosa obtenidas
+
         return glucoseMeasurements;
     }
 
