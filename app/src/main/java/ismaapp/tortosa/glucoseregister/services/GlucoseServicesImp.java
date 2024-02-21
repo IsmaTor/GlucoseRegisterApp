@@ -16,6 +16,7 @@ import ismaapp.tortosa.glucoseregister.utils.DateUtils;
 public class GlucoseServicesImp implements IGlucoseServices{
 
     private final GlucoseRepository glucoseRepository;
+    private static final String ORDER_BY = " ORDER BY ";
     private static final String LOG_NAME = "GlucoseRepository";
     private boolean lastInsertSuccess = false;
 
@@ -27,12 +28,12 @@ public class GlucoseServicesImp implements IGlucoseServices{
     public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
         int offset = (pageNumber - 1) * limit;
-        String order = " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " ASC";
+        String order = ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " ASC";
 
         if (userSelection.equals("FECHA")) {
-            order = " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + ((orderByLatest) ? " DESC" : " ASC");
+            order = ORDER_BY + GlucoseDBHelper.COLUMN_DATE + ((orderByLatest) ? " DESC" : " ASC");
         } else if (userSelection.equals("REGISTRO")) {
-            order = " ORDER BY " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + ((orderByHighestGlucose) ? " DESC" : " ASC");
+            order = ORDER_BY + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + ((orderByHighestGlucose) ? " DESC" : " ASC");
         }
 
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
@@ -64,7 +65,6 @@ public class GlucoseServicesImp implements IGlucoseServices{
         }
 
         Log.d("Glucose Measurements", glucoseMeasurements.toString()); // Registro de depuración para las mediciones de glucosa obtenidas
-
         return glucoseMeasurements;
     }
 

@@ -1,6 +1,5 @@
 package ismaapp.tortosa.glucoseregister.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -107,10 +106,7 @@ fun GlucoseHistoryScreen(
                             .weight(1f)
                             .padding(4.dp)
                             .clickable {
-                                Log.d("GlucoseHistoryScreen", "FECHA clicked. orderByLatest: $orderByLatest")
                                 userSelection = "FECHA"
-                                //glucoseMeasurements = glucoseService.getPaginatedGlucoseDate(calculatedPageNumber, pageSize, !orderByLatest)
-                                Log.d("GlucoseHistoryScreen", "getPaginatedGlucoseDate called")
                                 onOrderByLatestChanged(!orderByLatest)
                                 onOrderByOldestChanged(!orderByOldest)
                             },
@@ -126,10 +122,7 @@ fun GlucoseHistoryScreen(
                             .weight(1f)
                             .padding(4.dp)
                             .clickable {
-                                Log.d("GlucoseHistoryScreen", "REGISTRO clicked. orderByHighestGlucose: $orderByHighestGlucose")
                                 userSelection = "REGISTRO"
-                                //glucoseMeasurements = glucoseService.getPaginatedGlucoseValues(calculatedPageNumber, pageSize, !orderByHighestGlucose)
-                                Log.d("GlucoseHistoryScreen", "getPaginatedGlucoseValues called")
                                 onOrderByLatestChanged(false)
                                 onOrderByOldestChanged(false)
                                 onOrderByHighestGlucoseChanged(!orderByHighestGlucose)
@@ -187,7 +180,6 @@ fun GlucoseHistoryScreen(
 
             Button(
                 onClick = {
-                    Log.d("MainActivity", "Navigating to next page")
                     navController.navigate("historial/${pageNumber + 1}")
                 },
                 modifier = Modifier
