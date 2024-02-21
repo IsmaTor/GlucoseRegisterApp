@@ -160,7 +160,7 @@ fun GlucoseHistoryScreen(
             Button(
                 onClick = {
                     if (pageNumber > 1) {
-                        navController.navigate("historialPaginado/${pageNumber - 1}")
+                        navController.navigate("historial/${pageNumber - 1}")
                     }
                 },
                 modifier = Modifier
@@ -188,7 +188,7 @@ fun GlucoseHistoryScreen(
             Button(
                 onClick = {
                     Log.d("MainActivity", "Navigating to next page")
-                    navController.navigate("historialPaginado/${pageNumber + 1}")
+                    navController.navigate("historial/${pageNumber + 1}")
                 },
                 modifier = Modifier
                     .weight(1f)

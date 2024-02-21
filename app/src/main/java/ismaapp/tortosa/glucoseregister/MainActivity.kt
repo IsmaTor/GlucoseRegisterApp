@@ -73,22 +73,6 @@ class MainActivity : ComponentActivity() {
                                         onOrderByLowestGlucoseChanged = { orderByLowestGlucose = it}
                                     )
                                 }
-                                composable("historialPaginado/{pageNumber}") { backStackEntry ->
-                                    val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(
-                                        glucoseService,
-                                        pageNumber,
-                                        navController,
-                                        orderByLatest,
-                                        orderByOldest,
-                                        orderByHighestGlucose,
-                                        orderByLowestGlucose,
-                                        onOrderByLatestChanged = { orderByLatest = it },
-                                        onOrderByOldestChanged = { orderByOldest = it },
-                                        onOrderByHighestGlucoseChanged = { orderByHighestGlucose = it},
-                                        onOrderByLowestGlucoseChanged = { orderByLowestGlucose = it}
-                                    )
-                                }
                             }
                         }
                     }
