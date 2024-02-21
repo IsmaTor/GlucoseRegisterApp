@@ -29,6 +29,8 @@ class MainActivity : ComponentActivity() {
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
+    private var orderByHighestGlucose by mutableStateOf(true)
+    private var orderByLowestGlucose by mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,20 +65,12 @@ class MainActivity : ComponentActivity() {
                                         navController,
                                         orderByLatest,
                                         orderByOldest,
+                                        orderByHighestGlucose,
+                                        orderByLowestGlucose,
                                         onOrderByLatestChanged = { orderByLatest = it },
-                                        onOrderByOldestChanged = { orderByOldest = it }
-                                    )
-                                }
-                                composable("historialPaginado/{pageNumber}") { backStackEntry ->
-                                    val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
-                                    GlucoseHistoryScreen(
-                                        glucoseService,
-                                        pageNumber,
-                                        navController,
-                                        orderByLatest,
-                                        orderByOldest,
-                                        onOrderByLatestChanged = { orderByLatest = it },
-                                        onOrderByOldestChanged = { orderByOldest = it }
+                                        onOrderByOldestChanged = { orderByOldest = it },
+                                        onOrderByHighestGlucoseChanged = { orderByHighestGlucose = it},
+                                        onOrderByLowestGlucoseChanged = { orderByLowestGlucose = it}
                                     )
                                 }
                             }
