@@ -18,10 +18,6 @@ public class GlucoseServicesImp implements IGlucoseServices{
     private final GlucoseRepository glucoseRepository;
     private static final String LOG_NAME = "GlucoseRepository";
     private boolean lastInsertSuccess = false;
-    private String lastUserSelection = null;
-    private boolean lastOrderByLatest = false;
-    private boolean lastOrderByHighestGlucose = false;
-
 
     public GlucoseServicesImp(GlucoseRepository glucoseRepository) {
         this.glucoseRepository = glucoseRepository;
@@ -31,18 +27,6 @@ public class GlucoseServicesImp implements IGlucoseServices{
     public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
         int offset = (pageNumber - 1) * limit;
-
-        // Si el usuario no ha cambiado la selección, usamos la última selección y ordenamiento
-        if (userSelection.equals(lastUserSelection)) {
-            orderByLatest = lastOrderByLatest;
-            orderByHighestGlucose = lastOrderByHighestGlucose;
-        } else {
-            // Guardamos la última selección y ordenamiento del usuario
-            lastUserSelection = userSelection;
-            lastOrderByLatest = orderByLatest;
-            lastOrderByHighestGlucose = orderByHighestGlucose;
-        }
-
         String order = " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " ASC";
 
         if (userSelection.equals("FECHA")) {
