@@ -115,7 +115,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
             }
             Button(
                 onClick = {
-                    glucoseService.getPaginatedGlucoseMeasurements(0, 20, true)
+                    glucoseService.getPaginatedGlucoseMeasurements(0, 12, true, true, "")
                     navController.navigate("historial/1") {
                         launchSingleTop = true
                     }
