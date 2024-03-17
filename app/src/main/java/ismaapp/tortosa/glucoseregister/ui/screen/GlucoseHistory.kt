@@ -15,7 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -143,56 +146,65 @@ fun GlucoseHistoryScreen(
                 Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.fillMaxWidth())
             }
         }
+        //llamada a los botones de navegación.
+        NavigationButtons(pageNumber = pageNumber, navController = navController)
+    }
+}
 
-        Row(
+@Composable
+fun NavigationButtons(
+    pageNumber: Int,
+    navController: NavController
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(
+            onClick = {
+                if (pageNumber > 1) {
+                    navController.navigate("historial/${pageNumber - 1}")
+                }
+            },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .weight(1f)
+                .heightIn(min = 24.dp)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(8.dp))
         ) {
-            Button(
-                onClick = {
-                    if (pageNumber > 1) {
-                        navController.navigate("historial/${pageNumber - 1}")
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 24.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Text("Anterior")
-            }
+            Text("Anterior")
+        }
 
-            Button(
-                onClick = {
-                    navController.popBackStack("glucoseMeasurement", inclusive = false)
-                },
-                modifier = Modifier
-                    .weight(0.8f)
-                    .heightIn(min = 24.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Text("Home")
-            }
+        Button(
+            onClick = {
+                navController.popBackStack("glucoseMeasurement", inclusive = false)
+            },
+            modifier = Modifier
+                .weight(0.8f)
+                .heightIn(min = 24.dp)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Icon(Icons.Filled.Home, contentDescription = "Home")
+        }
 
-            Button(
-                onClick = {
-                    navController.navigate("historial/${pageNumber + 1}")
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 24.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Text("Siguiente")
-            }
+        Button(
+            onClick = {
+                navController.navigate("historial/${pageNumber + 1}")
+            },
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 24.dp)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Text("Siguiente")
         }
     }
 }
+
 
 @Composable
 fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
