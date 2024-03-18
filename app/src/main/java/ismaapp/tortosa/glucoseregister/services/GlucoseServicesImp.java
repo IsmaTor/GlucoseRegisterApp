@@ -112,7 +112,8 @@ public class GlucoseServicesImp implements IGlucoseServices{
         try {
             String query = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
                     " FROM " + GlucoseDBHelper.TABLE_NAME +
-                    ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC LIMIT 1";
+                    ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
+                    GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
 
             Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
 
