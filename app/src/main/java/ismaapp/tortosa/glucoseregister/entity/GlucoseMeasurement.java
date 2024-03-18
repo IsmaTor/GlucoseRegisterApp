@@ -2,10 +2,10 @@ package ismaapp.tortosa.glucoseregister.entity;
 
 public class GlucoseMeasurement {
     private final long id;
-    private final double glucoseValue;
+    private final int glucoseValue;
     private final String date;
 
-    public GlucoseMeasurement(long id, double glucoseValue, String date) {
+    public GlucoseMeasurement(long id, int glucoseValue, String date) {
         this.id = id;
         this.glucoseValue = glucoseValue;
         this.date = date;
@@ -15,7 +15,7 @@ public class GlucoseMeasurement {
         return id;
     }
 
-    public double getGlucoseValue() {
+    public int getGlucoseValue() {
         return glucoseValue;
     }
 

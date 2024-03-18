@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class GlucoseDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "glucosedb.db";
     private static final int DATABASE_VERSION = 1;
-
     public static final String TABLE_NAME = "glucose_measurements";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_GLUCOSE_VALUE = "glucose_value";

@@ -48,7 +48,7 @@ public class GlucoseServicesImp implements IGlucoseServices{
 
                     if (idIndex != -1 && glucoseValueIndex != -1 && dateIndex != -1) {
                         long id = cursor.getLong(idIndex);
-                        double glucoseValue = cursor.getDouble(glucoseValueIndex);
+                        int glucoseValue = cursor.getInt(glucoseValueIndex);
                         String date = cursor.getString(dateIndex);
 
                         GlucoseMeasurement measurement = new GlucoseMeasurement(id, glucoseValue, date);
@@ -69,27 +69,33 @@ public class GlucoseServicesImp implements IGlucoseServices{
     }
 
     @Override
-    public void insertGlucoseMeasurement(float glucoseValue) {
+    public void insertGlucoseMeasurement(int glucoseValue) {
         try {
-            Log.d(LOG_NAME, "Inserting glucose measurement: " + glucoseValue);
-            String date = DateUtils.getFormattedDate();
-            ContentValues values = new ContentValues();
-            values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
-            values.put(GlucoseDBHelper.COLUMN_DATE, date);
+            if (glucoseValue != 0) {
+                Log.d(LOG_NAME, "Inserting glucose measurement: " + glucoseValue);
+                String date = DateUtils.getFormattedDate();
+                ContentValues values = new ContentValues();
+                values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
+                values.put(GlucoseDBHelper.COLUMN_DATE, date);
 
-            long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
+                long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
 
-            lastInsertSuccess = newRowId != -1;
+                lastInsertSuccess = newRowId != -1;
 
-            if (lastInsertSuccess) {
-                Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId + "date: " + date);
+                if (lastInsertSuccess) {
+                    Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId + "date: " + date);
+                } else {
+                    Log.e(LOG_NAME, "Error inserting register into database.");
+                }
             } else {
-                Log.e(LOG_NAME, "Error inserting register into database.");
+                lastInsertSuccess = false;
+                Log.e(LOG_NAME, "Cannot insert glucose measurement with value 0.");
             }
-        }catch (Exception e) {
-                Log.e(LOG_NAME, "Exception while inserting glucose measurement: " + e.getMessage());
-            }
+        } catch (Exception e) {
+            Log.e(LOG_NAME, "Exception while inserting glucose measurement: " + e.getMessage());
+        }
     }
+
 
     @Override
     public boolean isInsertSuccess() {
@@ -107,8 +113,8 @@ public class GlucoseServicesImp implements IGlucoseServices{
     }
 
     @Override
-    public float getLastGlucoseMeasurement() {
-        float lastGlucoseMeasurement = 0.0f;
+    public int getLastGlucoseMeasurement() {
+        int lastGlucoseMeasurement = 0;
         try {
             String query = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
                     " FROM " + GlucoseDBHelper.TABLE_NAME +
@@ -120,7 +126,7 @@ public class GlucoseServicesImp implements IGlucoseServices{
             if (cursor != null && cursor.moveToFirst()) {
                 int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
                 if (glucoseValueIndex != -1) {
-                    lastGlucoseMeasurement = cursor.getFloat(glucoseValueIndex);
+                    lastGlucoseMeasurement = (int) cursor.getFloat(glucoseValueIndex);
                 }
                 cursor.close();
             }
