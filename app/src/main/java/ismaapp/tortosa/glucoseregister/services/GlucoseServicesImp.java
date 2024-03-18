@@ -106,4 +106,27 @@ public class GlucoseServicesImp implements IGlucoseServices{
         }
     }
 
+    @Override
+    public float getLastGlucoseMeasurement() {
+        float lastGlucoseMeasurement = 0.0f;
+        try {
+            String query = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
+                    " FROM " + GlucoseDBHelper.TABLE_NAME +
+                    ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC LIMIT 1";
+
+            Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
+                if (glucoseValueIndex != -1) {
+                    lastGlucoseMeasurement = cursor.getFloat(glucoseValueIndex);
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(LOG_NAME, "Error retrieving last glucose measurement: " + e.getMessage());
+        }
+        return lastGlucoseMeasurement;
+    }
+
 }
