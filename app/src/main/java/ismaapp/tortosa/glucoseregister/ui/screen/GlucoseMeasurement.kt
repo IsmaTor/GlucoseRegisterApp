@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -81,74 +82,21 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
             }
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = {
-                    // Insertar medición en la base de datos
-                    glucoseService.insertGlucoseMeasurement(glucoseValue)
-
-                    val isInsertSuccessful = glucoseService.isInsertSuccess // Asume que hay un método en glucoseService para verificar si la inserción fue exitosa
-
-                    if (isInsertSuccessful) {
-                        isMeasurementSuccessful = true
-                        showMessage = true
-                        message = "Medición registrada correctamente"
-                        glucoseValue = 0
-                    } else {
-                        isMeasurementSuccessful = false
-                        showMessage = true
-                        message = "Medición no registrada correctamente"
-                    }
-                    keyboardController?.hide()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .heightIn(min = 48.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Registrar")
+        buttonsHome(
+            glucoseService = glucoseService,
+            navController = navController,
+            glucoseValue = glucoseValue,
+            keyboardController = keyboardController,
+            onMeasurementRegistered = { newSuccessful, newMessage, newGlucoseValue ->
+                isMeasurementSuccessful = newSuccessful
+                showMessage = true
+                message = newMessage
+                glucoseValue = newGlucoseValue
+            },
+            onLastMeasurementUpdated = { newLastMeasurement ->
+                lastMeasurement = newLastMeasurement
             }
-            Button(
-                onClick = {
-                    glucoseService.getPaginatedGlucoseMeasurements(0, 12, true, true, "")
-                    navController.navigate("historial/1") {
-                        launchSingleTop = true
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .heightIn(min = 48.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Icon(Icons.Default.DateRange, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Historial")
-            }
-            Button(
-                onClick = {
-                    // Obtener la última medición de la base de datos
-                    lastMeasurement = glucoseService.lastGlucoseMeasurement
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .heightIn(min = 48.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Icon(Icons.Default.Refresh, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Actualizar")
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -179,6 +127,81 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
             lastMeasure(lastMeasurement = lastMeasurement)
         }
 
+    }
+}
+
+@Composable
+fun buttonsHome(
+    glucoseService: IGlucoseServices,
+    navController: NavController,
+    glucoseValue: Int,
+    keyboardController: SoftwareKeyboardController?,
+    onMeasurementRegistered: (Boolean, String, Int) -> Unit,
+    onLastMeasurementUpdated: (Int?) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = {
+                // Insertar medición en la base de datos
+                glucoseService.insertGlucoseMeasurement(glucoseValue)
+
+                val isInsertSuccessful = glucoseService.isInsertSuccess
+
+                if (isInsertSuccessful) {
+                    onMeasurementRegistered(true, "Medición registrada correctamente", 0)
+                } else {
+                    onMeasurementRegistered(false, "Medición no registrada correctamente", glucoseValue)
+                }
+                keyboardController?.hide()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .heightIn(min = 48.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Registrar")
+        }
+        Button(
+            onClick = {
+                glucoseService.getPaginatedGlucoseMeasurements(0, 12, true, true, "")
+                navController.navigate("historial/1") {
+                    launchSingleTop = true
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .heightIn(min = 48.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Icon(Icons.Default.DateRange, contentDescription = null)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Historial")
+        }
+        Button(
+            onClick = {
+                // Obtener la última medición de la base de datos
+                val updatedLastMeasurement = glucoseService.lastGlucoseMeasurement
+                onLastMeasurementUpdated(updatedLastMeasurement)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .heightIn(min = 48.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Icon(Icons.Default.Refresh, contentDescription = null)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Actualizar")
+        }
     }
 }
 
