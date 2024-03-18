@@ -20,8 +20,10 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,56 +32,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
-import ismaapp.tortosa.glucoseregister.utils.DateUtils
+import kotlinx.coroutines.delay
 
 @Composable
 fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: NavController) {
     var glucoseValue by remember { mutableStateOf(0f) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
+    var lastMeasurement: Float? by remember { mutableStateOf(null) }
+    var message by remember { mutableStateOf("") }
 
-    val date = DateUtils.getFormattedDate()
+    // Obtener la última medición de la base de datos.
+    LaunchedEffect(Unit) {
+        lastMeasurement = glucoseService.getLastGlucoseMeasurement()
+    }
+
+    // El mensaje desaparecerá después del tiempo indicado.
+    LaunchedEffect(showMessage) {
+        if (showMessage) {
+            delay(5000) // 5 segundos.
+            showMessage = false // false para que desaparezca.
+        }
+    }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(100.dp)
     ) {
-        Text(
-            "Indique la medición:",
-            style = TextStyle(color = Color.White)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        var isError by remember { mutableStateOf(false) }
-        var message by remember { mutableStateOf("") }
-
-        OutlinedTextField(
-            value = glucoseValue.takeIf { it != 0f }?.toString() ?: "",
+        //Ingresar mediciones
+        GlucoseInput(
+            glucoseValue = glucoseValue,
             onValueChange = { newValue ->
-                isError = false
-
-                //Permitir solo un punto decimal y números
-                val regex = Regex("""^-?\d*\.?\d*$""")
-                if (newValue.isBlank() || regex.matches(newValue)) {
-                    glucoseValue = newValue.toFloatOrNull() ?: 0f
-                }
-            },
-            label = { Text("Ingrese el valor de glucosa", modifier = Modifier.align(Alignment.CenterHorizontally)) },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Decimal
-            ),
-            isError = isError,
-
-            textStyle = TextStyle(color = Color.White)
+                glucoseValue = newValue
+            }
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Column(
             modifier = Modifier
@@ -98,13 +95,16 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
                         isMeasurementSuccessful = true
                         showMessage = true
                         message = "Medición registrada correctamente"
+                        glucoseValue = 0f
                     } else {
                         isMeasurementSuccessful = false
                         showMessage = true
                         message = "Medición no registrada correctamente"
                     }
+                    keyboardController?.hide()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(4.dp)
                     .heightIn(min = 48.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -120,7 +120,8 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
                         launchSingleTop = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(4.dp)
                     .heightIn(min = 48.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -149,13 +150,76 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
                 Text(message, color = Color.White)
             }
         }
+        // Última medición guardada
+        lastMeasure(lastMeasurement = lastMeasurement)
+    }
+}
 
-        Text(
-            "Fecha: $date",
+@Composable
+private fun GlucoseInput(glucoseValue: Float, onValueChange: (Float) -> Unit) {
+    Text(
+        "Indique la medición:",
+        style = TextStyle(color = Color.White)
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    var isError by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = glucoseValue.takeIf { it != 0f }?.toString() ?: "",
+        onValueChange = { newValue ->
+            isError = false
+
+            // Permitir solo un punto decimal y números y tres digitos.
+            val regex = Regex("""^-?\d{0,3}(\.\d{0,1})?$""")
+            if (newValue.isBlank() || regex.matches(newValue)) {
+                onValueChange(newValue.toFloatOrNull() ?: 0f)
+            }
+        },
+        label = { Text("Ingrese el valor de glucosa") },
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Decimal
+        ),
+        isError = isError,
+        textStyle = TextStyle(color = Color.White),
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+fun lastMeasure(lastMeasurement: Float?) { //Float? porqué puede ser nulo
+
+    lastMeasurement?.let { measurement ->
+        val textColor = when {
+            measurement in 80.0..130.0 -> Color.Green // Si la medición está entre 80 y 130
+            measurement < 80.0 || measurement > 130.0 -> Color.Red.copy(alpha = 0.8f) // Si la medición es menor que 80 o mayor que 130
+            else -> Color.White // Por defecto
+        }
+
+        Surface(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(16.dp)
-                .background(Color.LightGray)
-        )
+                .fillMaxWidth()
+                .padding(8.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = Color.LightGray
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Última medición:",
+                    color = Color.DarkGray,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = "$measurement",
+                    color = textColor,
+                    fontSize = 8.em, // Doble de grande que el tamaño de fuente por defecto
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        }
     }
 }
