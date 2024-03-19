@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
@@ -140,10 +142,15 @@ fun buttonsHome(
     onMeasurementRegistered: (Boolean, String, Int) -> Unit,
     onLastMeasurementUpdated: (Int?) -> Unit
 ) {
+    // Valores para ajustar el recuadro
+    val xOffset = 0.dp
+    val yOffset = 60.dp
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .offset(x = xOffset, y = yOffset),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
@@ -208,35 +215,42 @@ fun buttonsHome(
 
 @Composable
 private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
-    Text(
-        "Indique la medición:",
-        style = TextStyle(color = Color.White)
-    )
-    Spacer(modifier = Modifier.height(8.dp))
+    val scale = 1.15f // Porcentaje de escala en este es un 15% más grande de 1.0
 
     var isError by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = glucoseValue.takeIf { it != 0 }?.toString() ?: "",
-        onValueChange = { newValue ->
-            isError = false
+    val backgroundColor = Color(0xFF808080).copy(alpha = 0.9f)
 
-            // Permitir solo un punto decimal y números y tres digitos.
-            val regex = Regex("""^-?\d{0,3}$""")
-            if (newValue.isBlank() || regex.matches(newValue)) {
-                onValueChange(newValue.toIntOrNull() ?: 0)
-            }
-        },
-        label = { Text("Ingrese el valor de glucosa") },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number
-        ),
-        isError = isError,
-        textStyle = TextStyle(color = Color.White),
-    )
+    Box(
+        modifier = Modifier.scale(scale)
+    ) {
+        OutlinedTextField(
+            value = glucoseValue.takeIf { it != 0 }?.toString() ?: "",
+            onValueChange = { newValue ->
+                isError = false
 
-    Spacer(modifier = Modifier.height(16.dp))
+                // Permitir solo un punto decimal y números y tres digitos.
+                val regex = Regex("""^-?\d{0,3}$""")
+                if (newValue.isBlank() || regex.matches(newValue)) {
+                    onValueChange(newValue.toIntOrNull() ?: 0)
+                }
+            },
+            label = { Text("Ingrese el valor de glucosa") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number
+            ),
+            isError = isError,
+            textStyle = TextStyle(color = Color.White, fontSize = 24.sp * scale),
+            modifier = Modifier
+                .background(backgroundColor)
+                .fillMaxWidth()
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp * scale))
 }
+
+
 
 @Composable
 fun lastMeasure(lastMeasurement: Int?) {
@@ -247,6 +261,7 @@ fun lastMeasure(lastMeasurement: Int?) {
             else -> Color.Red.copy(alpha = 0.8f) // Por defecto
         }
 
+        // Valores para ajustar el recuadro
         val xOffset = 0.dp
         val yOffset = 100.dp
 
@@ -254,7 +269,7 @@ fun lastMeasure(lastMeasurement: Int?) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .offset(x = xOffset, y = yOffset) // Offset para alinear manualmente
+                .offset(x = xOffset, y = yOffset)
         ) {
             Surface(
                 modifier = Modifier
@@ -263,7 +278,7 @@ fun lastMeasure(lastMeasurement: Int?) {
                 color = Color.LightGray
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
                 ) {
                     Text(
                         text = "Última medición:",
@@ -282,4 +297,3 @@ fun lastMeasure(lastMeasurement: Int?) {
         }
     }
 }
-
