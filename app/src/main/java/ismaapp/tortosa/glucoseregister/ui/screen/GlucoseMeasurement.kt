@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -238,7 +239,7 @@ private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
 }
 
 @Composable
-fun lastMeasure(lastMeasurement: Int?) { //Int? porqué puede ser nulo
+fun lastMeasure(lastMeasurement: Int?) {
 
     lastMeasurement?.let { measurement ->
         val textColor = when (measurement) {
@@ -246,29 +247,39 @@ fun lastMeasure(lastMeasurement: Int?) { //Int? porqué puede ser nulo
             else -> Color.Red.copy(alpha = 0.8f) // Por defecto
         }
 
-        Surface(
+        val xOffset = 0.dp
+        val yOffset = 100.dp
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(8.dp),
-            color = Color.LightGray
+                .padding(8.dp)
+                .offset(x = xOffset, y = yOffset) // Offset para alinear manualmente
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                color = Color.LightGray
             ) {
-                Text(
-                    text = "Última medición:",
-                    color = Color.DarkGray,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Text(
-                    text = "$measurement",
-                    color = textColor,
-                    fontSize = 8.em,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Última medición:",
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = "$measurement",
+                        color = textColor,
+                        fontSize = 8.em,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
         }
     }
 }
+

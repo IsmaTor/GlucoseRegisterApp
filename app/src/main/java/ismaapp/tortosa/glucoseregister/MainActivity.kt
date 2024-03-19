@@ -21,6 +21,10 @@ import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseHistoryScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseMeasurementScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
@@ -43,22 +47,26 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
-
-                        Surface(
+                        Image(
+                            painter = painterResource(id = R.drawable.wallpaper),
+                            contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            color = Color.DarkGray
-                        ) {
-                            val navController = rememberNavController()
+                            contentScale = ContentScale.Crop
+                        )
 
-                            NavHost(
-                                navController = navController,
-                                startDestination = "glucoseMeasurement"
-                            ) {
-                                composable("glucoseMeasurement") {
-                                    GlucoseMeasurementScreen(glucoseService, navController)
-                                }
-                                composable("historial/{pageNumber}") { backStackEntry ->
-                                    val pageNumber = backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
+                        val navController = rememberNavController()
+
+                        NavHost(
+                            navController = navController,
+                            startDestination = "glucoseMeasurement"
+                        ) {
+                            composable("glucoseMeasurement") {
+                                GlucoseMeasurementScreen(glucoseService, navController)
+                            }
+                            composable("historial/{pageNumber}") { backStackEntry ->
+                                val pageNumber =
+                                    backStackEntry.arguments?.getString("pageNumber")?.toInt() ?: 1
+                                Surface(color = Color.DarkGray) {
                                     GlucoseHistoryScreen(
                                         glucoseService,
                                         pageNumber,
@@ -69,8 +77,12 @@ class MainActivity : ComponentActivity() {
                                         orderByLowestGlucose,
                                         onOrderByLatestChanged = { orderByLatest = it },
                                         onOrderByOldestChanged = { orderByOldest = it },
-                                        onOrderByHighestGlucoseChanged = { orderByHighestGlucose = it},
-                                        onOrderByLowestGlucoseChanged = { orderByLowestGlucose = it}
+                                        onOrderByHighestGlucoseChanged = {
+                                            orderByHighestGlucose = it
+                                        },
+                                        onOrderByLowestGlucoseChanged = {
+                                            orderByLowestGlucose = it
+                                        }
                                     )
                                 }
                             }
