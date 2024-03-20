@@ -1,5 +1,4 @@
-name: Jacoco Coverage Check
-
+name: Build
 on:
   push:
     branches:
@@ -9,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Check Jacoco Coverage
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,11 +24,28 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
       - name: Generate Jacoco coverage report
         run: ./gradlew jacocoTestReport
 
-      - name: Display coverage report
-        run: cat build/reports/jacoco/test/html/index.html  # Output the coverage report for review
-
+      - name: Build and analyze with SonarCloud
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew build sonar --info
 
 
