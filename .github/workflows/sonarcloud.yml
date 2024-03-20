@@ -19,6 +19,12 @@ jobs:
       - name: Set execute permissions for gradlew
         run: chmod +x gradlew
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
       - name: Generate Jacoco coverage report
         run: ./gradlew jacocoTestReport
 
