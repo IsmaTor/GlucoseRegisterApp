@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'jacoco'
 }
 
 android {
@@ -72,3 +73,22 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 }
+
+// Configuración de Jacoco
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+// Configuración de la tarea jacocoTestReport
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
+    reports {
+        xml.required = true 
+        html.required = true
+    }
+    def coverageSourceDirs = ['src/main/java'] // Directorio(s) donde se encuentran tus fuentes de código
+    sourceDirectories.setFrom(files(coverageSourceDirs))
+    classDirectories.setFrom(files('build/intermediates/javac/debug/classes'))
+    executionData.setFrom(files('build/jacoco/testDebugUnitTest.exec'))
+}
+
+
