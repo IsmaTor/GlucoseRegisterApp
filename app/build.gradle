@@ -82,7 +82,7 @@ jacoco {
 // Configuración de la tarea jacocoTestReport
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
     reports {
-        xml.required = true 
+        xml.required = true
         html.required = true
     }
     def coverageSourceDirs = ['src/main/java'] // Directorio(s) donde se encuentran tus fuentes de código

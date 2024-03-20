@@ -1,4 +1,4 @@
-package ismaapp.tortosa.glucoseregister;
+package ismaapp.tortosa.glucoseregister.utils;
 
 import java.util.Date;
 
