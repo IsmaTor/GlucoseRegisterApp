@@ -162,4 +162,14 @@ public class GlucoseServicesImp implements IGlucoseServices{
         }
     }
 
+    public int prueba() {
+        int a = 1;
+        int b = 2;
+        int result;
+
+        result = a + b;
+
+        return result;
+    }
+
 }

@@ -1,5 +1,6 @@
 package ismaapp.tortosa.glucoseregister.services;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -8,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -19,6 +21,8 @@ public class GlucoseServicesImpTest {
 
     @Mock
     GlucoseRepository glucoseRepository;
+    @InjectMocks
+    GlucoseServicesImp glucoseServicesImp;
     @Mock
     SQLiteDatabase database;
     @Mock
@@ -35,5 +39,17 @@ public class GlucoseServicesImpTest {
         boolean result = glucoseServices.isDatabaseEmptyOrNull();
 
         assertTrue(result); // La base de datos debería estar vacía
+    }
+
+    @Test
+    public void pruebaTest() {
+
+
+        // Act
+        int resultado = glucoseServicesImp.prueba();
+
+        assertEquals(3, resultado);
+
+
     }
 }
