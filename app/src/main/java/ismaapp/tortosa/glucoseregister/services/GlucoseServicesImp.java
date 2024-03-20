@@ -2,6 +2,7 @@ package ismaapp.tortosa.glucoseregister.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
@@ -134,6 +135,31 @@ public class GlucoseServicesImp implements IGlucoseServices{
             Log.e(LOG_NAME, "Error retrieving last glucose measurement: " + e.getMessage());
         }
         return lastGlucoseMeasurement;
+    }
+
+    @Override
+    public boolean isDatabaseEmptyOrNull() {
+        try {
+            SQLiteDatabase database = glucoseRepository.getDatabase();
+            if (database == null) {
+                Log.e(LOG_NAME, "Database is null.");
+                return true;
+            } else {
+                String query = "SELECT COUNT(*) FROM " + GlucoseDBHelper.TABLE_NAME;
+                Cursor cursor = database.rawQuery(query, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int count = cursor.getInt(0);
+                    cursor.close();
+                    return count == 0;
+                } else {
+                    Log.e(LOG_NAME, "Cursor is null or empty.");
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(LOG_NAME, "Error checking if database is empty or null: " + e.getMessage());
+            return true;
+        }
     }
 
 }
