@@ -38,17 +38,21 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: JaCoCo Report
-        uses: Madrapps/jacoco-report@v1.6.1
-
       - name: Generate Jacoco coverage report
         run: ./gradlew jacocoTestReport
+
+      - name: JaCoCo Report  # Mueve este paso hacia arriba
+        uses: Madrapps/jacoco-report@v1.6.1
+        with:
+          # Configura la ruta al reporte JaCoCo (ajústalo si es necesario)
+          reportPath: ./build/reports/jacoco/test.exec  # Ruta probable del reporte
 
       - name: Build and analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew build sonar --info
+          ./gradlew build sonar --info ...
+
 
 
