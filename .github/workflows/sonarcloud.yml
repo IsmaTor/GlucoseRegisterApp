@@ -38,6 +38,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
+      - name: JaCoCo Report
+        uses: Madrapps/jacoco-report@v1.6.1
+
       - name: Generate Jacoco coverage report
         run: ./gradlew jacocoTestReport
 
