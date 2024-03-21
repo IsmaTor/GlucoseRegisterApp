@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0    # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set execute permissions for gradlew
         run: chmod +x gradlew
@@ -39,14 +39,15 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Run tests with JaCoCo
-        run: ./gradlew test jacocoTestReport
+      - name: Build and analyze with SonarCloud
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew build sonar --info
 
-      - name: Generate JaCoCo coverage report
-        uses: bahmutov/jacoco-report@v1
-        with:
-          files: "**/build/reports/jacoco/test/html/index.html"
-          name: Jacoco Report
+      - name: JaCoCo Report
+        uses: Madrapps/jacoco-report@v1.6.1
 
 
 
