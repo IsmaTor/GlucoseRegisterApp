@@ -34,8 +34,9 @@ jobs:
       - name: Generate JaCoCo coverage report
         uses: bahmutov/jacoco-report@v1
         with:
-          files: "**/build/reports/jacoco/test/html/index.html"
+          files: "${{ github.workspace }}/path/to/your/report/index.html"
           name: Jacoco Report
+      
 
 
 
