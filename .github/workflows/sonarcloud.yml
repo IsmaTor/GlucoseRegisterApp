@@ -20,6 +20,12 @@ jobs:
           chmod +x gradlew
           ./gradlew jacocoTestReport
 
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: jacoco-report
+          path: ${{ github.workspace }}/path/to/your/report
+
       - name: Add coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
@@ -31,11 +37,7 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
 
-      - name: Upload JaCoCo coverage report
-        uses: actions/upload-artifact@v2
-        with:
-          name: jacoco-report
-          path: ${{ github.workspace }}/path/to/your/report
+
 
 
 
