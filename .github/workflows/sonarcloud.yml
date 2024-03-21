@@ -1,17 +1,18 @@
-name: Measure coverage
+name: Build
 
 on:
-  pull_request:
+  push:
+    branches-ignore:
+      - '*'
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0    # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
       - name: Set execute permissions for gradlew
         run: chmod +x gradlew
@@ -21,21 +22,25 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Run Coverage
-        run: |
-          chmod +x gradlew
-          ./gradlew testCoverage
 
-      - name: Add coverage to PR
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.6.1
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
         with:
-          paths: |
-            ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
-            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 40
-          min-coverage-changed-files: 60
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Run tests with JaCoCo
+        run: ./gradlew test jacocoTestReport
+
+
 
 
 
