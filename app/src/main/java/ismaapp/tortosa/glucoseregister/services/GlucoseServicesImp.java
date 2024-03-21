@@ -127,12 +127,12 @@ public class GlucoseServicesImp implements IGlucoseServices{
             if (cursor != null && cursor.moveToFirst()) {
                 int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
                 if (glucoseValueIndex != -1) {
-                    lastGlucoseMeasurement = (int) cursor.getFloat(glucoseValueIndex);
+                    lastGlucoseMeasurement = cursor.getInt(glucoseValueIndex);
                 }
                 cursor.close();
             }
         } catch (Exception e) {
-            Log.e(LOG_NAME, "Error retrieving last glucose measurement: " + e.getMessage());
+            //Log.e(LOG_NAME, "Error retrieving last glucose measurement: " + e.getMessage());
         }
         return lastGlucoseMeasurement;
     }
@@ -162,14 +162,18 @@ public class GlucoseServicesImp implements IGlucoseServices{
         }
     }
 
-    public int prueba() {
-        int a = 1;
-        int b = 2;
-        int result;
+    public int sum(int a, int b) {
+        return a + b;
+    }
 
-        result = a + b;
+    public int subtract(int a, int b) {
+        return a - b;
+    }
 
-        return result;
+    public int sumAndSubtract(int a, int b) {
+        int sumResult = sum(a, b);
+        int subtractResult = subtract(a, b);
+        return sumResult + subtractResult;
     }
 
 }
