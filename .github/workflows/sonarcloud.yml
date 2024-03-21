@@ -42,6 +42,13 @@ jobs:
       - name: Run tests with JaCoCo
         run: ./gradlew test jacocoTestReport
 
+      - name: Generate JaCoCo coverage report
+        uses: bahmutov/jacoco-report@v1
+        with:
+          files: "**/build/reports/jacoco/test/html/index.html"
+          name: Jacoco Report
+
+
 
 
 
