@@ -1,16 +1,18 @@
-name: Build
+name: Build and Measure coverage
+
 on:
-  push:
-    branches:
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   build:
-    name: Build
+    name: Build and Measure coverage
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0    # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -22,22 +24,46 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
-      - name: Build and analyze
+
+      - name: Build and analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./gradlew build sonar --info
 
+      - name: Run Coverage
+        run: |
+          chmod +x gradlew
+          ./gradlew jacocoTestReport
+
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: jacoco-report
+          path: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/html/index.html
+
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
+            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
