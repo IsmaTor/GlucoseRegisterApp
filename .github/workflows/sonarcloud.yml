@@ -31,6 +31,12 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
 
+      - name: Generate JaCoCo coverage report
+        uses: bahmutov/jacoco-report@v1
+        with:
+          files: "**/build/reports/jacoco/test/html/index.html"
+          name: Jacoco Report
+
 
 
 
