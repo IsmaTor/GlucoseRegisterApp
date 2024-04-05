@@ -162,6 +162,9 @@ fun buttonsHome(
 
                 if (isInsertSuccessful) {
                     onMeasurementRegistered(true, "Medición registrada correctamente", 0)
+
+                    val updatedLastMeasurement = glucoseService.lastGlucoseMeasurement
+                    onLastMeasurementUpdated(updatedLastMeasurement)
                 } else {
                     onMeasurementRegistered(false, "Medición no registrada correctamente", glucoseValue)
                 }
