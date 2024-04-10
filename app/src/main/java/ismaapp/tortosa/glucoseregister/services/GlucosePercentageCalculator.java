@@ -43,7 +43,7 @@ public class GlucosePercentageCalculator {
                         int glucoseValue = measurement.getGlucoseValue();
                         if (glucoseValue < 80) {
                             lowCount++;
-                        } else if (glucoseValue >= 80 && glucoseValue <= 130) {
+                        } else if (glucoseValue <= 130) {
                             normalCount++;
                         } else {
                             highCount++;
@@ -55,9 +55,9 @@ public class GlucosePercentageCalculator {
             double totalCategories = (double) lowCount + normalCount + highCount;
 
             if (totalCategories > 0) {
-                glucosePercentages.put("Low (<80)", (lowCount / totalCategories) * 100.0);
+                glucosePercentages.put("Bajo (<80)", (lowCount / totalCategories) * 100.0);
                 glucosePercentages.put("Normal (80-130)", (normalCount / totalCategories) * 100.0);
-                glucosePercentages.put("High (>130)", (highCount / totalCategories) * 100.0);
+                glucosePercentages.put("Alto (>130)", (highCount / totalCategories) * 100.0);
 
             } else {
                 Log.w(LOG_NAME, "No valid glucose measurements found to calculate percentages.");
@@ -83,7 +83,6 @@ public class GlucosePercentageCalculator {
                 null
         )) {
             if (cursor != null && cursor.moveToFirst()) {
-                int measurementCount = 0; // Contador de mediciones recuperadas
                 do {
                     int idIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
                     int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
@@ -96,8 +95,6 @@ public class GlucosePercentageCalculator {
 
                         GlucoseMeasurement measurement = new GlucoseMeasurement(id, glucoseValue, date);
                         glucoseMeasurements.add(measurement);
-
-                        measurementCount++; // Incrementar el contador
                     } else {
                         Log.e(LOG_NAME, "Column not found at cursor");
                     }
