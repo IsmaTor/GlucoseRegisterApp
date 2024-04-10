@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: NavController) {
-    var glucoseValue by remember { mutableStateOf(0) }
+    var glucoseValue by remember { mutableIntStateOf(0) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
     var lastMeasurement: Int? by remember { mutableStateOf(null) }
@@ -85,7 +86,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
             }
         )
 
-        buttonsHome(
+        ButtonsHome(
             glucoseService = glucoseService,
             navController = navController,
             glucoseValue = glucoseValue,
@@ -127,14 +128,14 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
                 }
             }
             // Muestra la última medición
-            lastMeasure(lastMeasurement = lastMeasurement)
+            LastMeasure(lastMeasurement = lastMeasurement)
         }
 
     }
 }
 
 @Composable
-fun buttonsHome(
+fun ButtonsHome(
     glucoseService: IGlucoseServices,
     navController: NavController,
     glucoseValue: Int,
@@ -239,7 +240,7 @@ private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
                 }
             },
             label = { Text("Ingrese el valor de glucosa") },
-            keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
             isError = isError,
@@ -256,7 +257,7 @@ private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
 
 
 @Composable
-fun lastMeasure(lastMeasurement: Int?) {
+fun LastMeasure(lastMeasurement: Int?) {
 
     lastMeasurement?.let { measurement ->
         val textColor = when (measurement) {

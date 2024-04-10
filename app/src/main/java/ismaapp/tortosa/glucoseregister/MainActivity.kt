@@ -24,7 +24,7 @@ import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-
+import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
@@ -84,6 +84,11 @@ class MainActivity : ComponentActivity() {
                                             orderByLowestGlucose = it
                                         }
                                     )
+                                }
+                            }
+                            composable("configurarTiempoRango") {
+                                Surface(color = Color.DarkGray) {
+                                    GlucoseTimeRangeScreen(glucoseRepository = glucoseRepository)
                                 }
                             }
                         }

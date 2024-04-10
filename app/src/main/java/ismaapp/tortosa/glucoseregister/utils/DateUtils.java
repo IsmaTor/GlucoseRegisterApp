@@ -28,7 +28,6 @@ public class DateUtils {
         return dateFormat.format(date);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private static String getFormattedDateNow() {
         LocalDateTime localDate = LocalDateTime.now();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.getDefault());

@@ -75,7 +75,7 @@ fun GlucoseHistoryScreen(
             color = Color.White
         )
 
-        // Botón para borrar todas las mediciones
+        // Botón para borrar todas las mediciones.
         Button(
             onClick = {
                 showDialog = true
@@ -89,6 +89,21 @@ fun GlucoseHistoryScreen(
         ) {
             Text("Borrar Todas las Mediciones", color = Color.White)
         }
+
+        //Botón para el tiempo de rango.
+        Button(
+            onClick = {
+                navController.navigate("configurarTiempoRango")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .heightIn(min = 24.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Text("Configurar Tiempo de Rango", color = Color.White)
+        }
+
 
         ConfirmDeleteDialog(
             showDialog = showDialog,

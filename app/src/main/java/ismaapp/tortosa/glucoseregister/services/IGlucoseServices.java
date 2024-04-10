@@ -1,7 +1,6 @@
 package ismaapp.tortosa.glucoseregister.services;
 
 import java.util.List;
-
 import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement;
 
 public interface IGlucoseServices {
@@ -14,6 +13,6 @@ public interface IGlucoseServices {
     public void deleteAllGlucoseMeasurements();
     public boolean isInsertSuccess();
     public int getLastGlucoseMeasurement();
-
     boolean isDatabaseEmptyOrNull();
+
 }

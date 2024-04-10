@@ -5,10 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement;
 import ismaapp.tortosa.glucoseregister.helpers.GlucoseDBHelper;
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository;
@@ -19,6 +17,7 @@ public class GlucoseServicesImp implements IGlucoseServices{
     private final GlucoseRepository glucoseRepository;
     private static final String ORDER_BY = " ORDER BY ";
     private static final String LOG_NAME = "GlucoseRepository";
+
     private boolean lastInsertSuccess = false;
 
     public GlucoseServicesImp(GlucoseRepository glucoseRepository) {
@@ -96,7 +95,6 @@ public class GlucoseServicesImp implements IGlucoseServices{
             Log.e(LOG_NAME, "Exception while inserting glucose measurement: " + e.getMessage());
         }
     }
-
 
     @Override
     public boolean isInsertSuccess() {
