@@ -13,7 +13,6 @@ import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository;
 import ismaapp.tortosa.glucoseregister.utils.DateUtil;
 
 public class GlucoseServiceImp implements IGlucoseService {
-
     private final GlucoseRepository glucoseRepository;
     private static final String ORDER_BY = " ORDER BY ";
     private static final String LOG_NAME = "GlucoseRepository";
@@ -27,43 +26,15 @@ public class GlucoseServiceImp implements IGlucoseService {
     public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int pageNumber, int limit, boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
         int offset = (pageNumber - 1) * limit;
-        String order = ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " ASC";
-
-        if (userSelection.equals("FECHA")) {
-            order = ORDER_BY + GlucoseDBHelper.COLUMN_DATE + ((orderByLatest) ? " DESC" : " ASC");
-        } else if (userSelection.equals("REGISTRO")) {
-            order = ORDER_BY + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + ((orderByHighestGlucose) ? " DESC" : " ASC");
-        }
-
+        String order = buildOrderByClause(orderByLatest, orderByHighestGlucose, userSelection);
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
                 order + " LIMIT " + limit + " OFFSET " + offset;
-
         try (Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int idIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
-                    int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
-                    int dateIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_DATE);
-
-                    if (idIndex != -1 && glucoseValueIndex != -1 && dateIndex != -1) {
-                        long id = cursor.getLong(idIndex);
-                        int glucoseValue = cursor.getInt(glucoseValueIndex);
-                        String date = cursor.getString(dateIndex);
-
-                        GlucoseMeasurement measurement = new GlucoseMeasurement(id, glucoseValue, date);
-                        glucoseMeasurements.add(measurement);
-                    } else {
-                        Log.e(LOG_NAME, "Column not found at cursor");
-                    }
-                } while (cursor.moveToNext());
-            } else {
-                Log.d(LOG_NAME, "No rows found in cursor."); // Registro de depuración para cuando no se encuentran filas en el cursor
-            }
+            glucoseMeasurements = extractGlucoseMeasurementsFromCursor(cursor);
         } catch (SQLiteException e) {
-            Log.e(LOG_NAME, "Error executing database query", e);
+            logError("Error executing database query", e);
         }
-
-        Log.d("Glucose Measurements", glucoseMeasurements.toString()); // Registro de depuración para las mediciones de glucosa obtenidas
+        logDebug("Glucose Measurements: " + glucoseMeasurements);
         return glucoseMeasurements;
     }
 
@@ -71,27 +42,23 @@ public class GlucoseServiceImp implements IGlucoseService {
     public void insertGlucoseMeasurement(int glucoseValue) {
         try {
             if (glucoseValue != 0) {
-                Log.d(LOG_NAME, "Inserting glucose measurement: " + glucoseValue);
                 String date = DateUtil.getFormattedDate();
                 ContentValues values = new ContentValues();
                 values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
                 values.put(GlucoseDBHelper.COLUMN_DATE, date);
-
                 long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
-
                 lastInsertSuccess = newRowId != -1;
-
                 if (lastInsertSuccess) {
-                    Log.d(LOG_NAME, "Register inserted successfully, ID: " + newRowId + "date: " + date);
+                    logDebug("Register inserted successfully, ID: " + newRowId + ", date: " + date);
                 } else {
-                    Log.e(LOG_NAME, "Error inserting register into database.");
+                    logError("Error inserting register into database", null);
                 }
             } else {
                 lastInsertSuccess = false;
-                Log.e(LOG_NAME, "Cannot insert glucose measurement with value 0.");
+                logError("Cannot insert glucose measurement with value 0", null);
             }
         } catch (Exception e) {
-            Log.e(LOG_NAME, "Exception while inserting glucose measurement: " + e.getMessage());
+            logError("Exception while inserting glucose measurement: " + e.getMessage(), e);
         }
     }
 
@@ -104,9 +71,9 @@ public class GlucoseServiceImp implements IGlucoseService {
     public void deleteAllGlucoseMeasurements() {
         try {
             glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, null, null);
-            Log.d(LOG_NAME, "All glucose measurements deleted successfully.");
+            logDebug("All glucose measurements deleted successfully.");
         } catch (SQLiteException e) {
-            Log.e(LOG_NAME, "Error deleting all glucose measurements.", e);
+            logError("Error deleting all glucose measurements", e);
         }
     }
 
@@ -118,18 +85,16 @@ public class GlucoseServiceImp implements IGlucoseService {
                     " FROM " + GlucoseDBHelper.TABLE_NAME +
                     ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
                     GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
-
             Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
-
             if (cursor != null && cursor.moveToFirst()) {
                 int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
                 if (glucoseValueIndex != -1) {
-                    lastGlucoseMeasurement = (int) cursor.getFloat(glucoseValueIndex);
+                    lastGlucoseMeasurement = cursor.getInt(glucoseValueIndex);
                 }
                 cursor.close();
             }
         } catch (Exception e) {
-            Log.e(LOG_NAME, "Error retrieving last glucose measurement: " + e.getMessage());
+            logError("Error retrieving last glucose measurement: " + e.getMessage(), e);
         }
         return lastGlucoseMeasurement;
     }
@@ -139,7 +104,7 @@ public class GlucoseServiceImp implements IGlucoseService {
         try {
             SQLiteDatabase database = glucoseRepository.getDatabase();
             if (database == null) {
-                Log.e(LOG_NAME, "Database is null.");
+                logError("Database is null", null);
                 return true;
             } else {
                 String query = "SELECT COUNT(*) FROM " + GlucoseDBHelper.TABLE_NAME;
@@ -149,12 +114,12 @@ public class GlucoseServiceImp implements IGlucoseService {
                     cursor.close();
                     return count == 0;
                 } else {
-                    Log.e(LOG_NAME, "Cursor is null or empty.");
+                    logError("Cursor is null or empty", null);
                     return true;
                 }
             }
         } catch (Exception e) {
-            Log.e(LOG_NAME, "Error checking if database is empty or null: " + e.getMessage());
+            logError("Error checking if database is empty or null: " + e.getMessage(), e);
             return true;
         }
     }
@@ -162,7 +127,6 @@ public class GlucoseServiceImp implements IGlucoseService {
     @Override
     public List<GlucoseMeasurement> getAllGlucoseMeasurements() {
         List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
-
         try (Cursor cursor = glucoseRepository.getDatabase().query(
                 GlucoseDBHelper.TABLE_NAME,
                 null,
@@ -172,31 +136,51 @@ public class GlucoseServiceImp implements IGlucoseService {
                 null,
                 null
         )) {
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int idIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
-                    int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
-                    int dateIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_DATE);
-
-                    if (idIndex != -1 && glucoseValueIndex != -1 && dateIndex != -1) {
-                        long id = cursor.getLong(idIndex);
-                        int glucoseValue = cursor.getInt(glucoseValueIndex);
-                        String date = cursor.getString(dateIndex);
-
-                        GlucoseMeasurement measurement = new GlucoseMeasurement(id, glucoseValue, date);
-                        glucoseMeasurements.add(measurement);
-                    } else {
-                        Log.e(LOG_NAME, "Column not found at cursor");
-                    }
-                } while (cursor.moveToNext());
-
-            } else {
-                Log.d(LOG_NAME, "No rows found in cursor.");
-            }
+            glucoseMeasurements = extractGlucoseMeasurementsFromCursor(cursor);
         } catch (SQLiteException e) {
-            Log.e(LOG_NAME, "Error executing database query", e);
+            logError("Error executing database query", e);
         }
-
         return glucoseMeasurements;
     }
+
+    private String buildOrderByClause(boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
+        if (userSelection.equals("FECHA")) {
+            return ORDER_BY + GlucoseDBHelper.COLUMN_DATE + (orderByLatest ? " DESC" : " ASC");
+        } else if (userSelection.equals("REGISTRO")) {
+            return ORDER_BY + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + (orderByHighestGlucose ? " DESC" : " ASC");
+        }
+        return ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " ASC"; // Default order
+    }
+
+    private List<GlucoseMeasurement> extractGlucoseMeasurementsFromCursor(Cursor cursor) {
+        List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                int idIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
+                int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
+                int dateIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_DATE);
+                if (idIndex != -1 && glucoseValueIndex != -1 && dateIndex != -1) {
+                    long id = cursor.getLong(idIndex);
+                    int glucoseValue = cursor.getInt(glucoseValueIndex);
+                    String date = cursor.getString(dateIndex);
+                    GlucoseMeasurement measurement = new GlucoseMeasurement(id, glucoseValue, date);
+                    glucoseMeasurements.add(measurement);
+                } else {
+                    logError("Column not found at cursor", null);
+                }
+            } while (cursor.moveToNext());
+        } else {
+            logDebug("No rows found in cursor.");
+        }
+        return glucoseMeasurements;
+    }
+
+    private void logError(String message, Exception e) {
+        Log.e(LOG_NAME, message, e);
+    }
+
+    private void logDebug(String message) {
+        Log.d(LOG_NAME, message);
+    }
 }
+
