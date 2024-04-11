@@ -35,12 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement
-import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 
 @Composable
 fun GlucoseHistoryScreen(
-    glucoseService: IGlucoseServices,
+    glucoseService: IGlucoseService,
     pageNumber: Int,
     navController: NavController,
     orderByLatest: Boolean,
@@ -75,20 +75,35 @@ fun GlucoseHistoryScreen(
             color = Color.White
         )
 
-        // Botón para borrar todas las mediciones
+        // Botón para borrar todas las mediciones.
         Button(
             onClick = {
                 showDialog = true
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(2.dp)
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = darkRed)
         ) {
-            Text("Borrar Todas las Mediciones", color = Color.White)
+            Text("BORRAR TODAS LAS MEDICIONES", color = Color.White)
         }
+
+        //Botón para el tiempo de rango.
+        Button(
+            onClick = {
+                navController.navigate("configurarTiempoRango")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(2.dp)
+                .heightIn(min = 24.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            Text("VER TIEMPO DE RANGO", color = Color.White)
+        }
+
 
         ConfirmDeleteDialog(
             showDialog = showDialog,
@@ -222,12 +237,12 @@ fun NavigationButtons(
                 }
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .heightIn(min = 24.dp)
                 .padding(8.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("Anterior")
+            Text("ANTERIOR")
         }
 
         Button(
@@ -248,12 +263,12 @@ fun NavigationButtons(
                 navController.navigate("historial/${pageNumber + 1}")
             },
             modifier = Modifier
-                .weight(1f)
+                .weight(1.1f)
                 .heightIn(min = 24.dp)
                 .padding(8.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("Siguiente")
+            Text("SIGUIENTE")
         }
     }
 }
@@ -268,19 +283,19 @@ fun GlucoseRow(positionNumber: Int, measurement: GlucoseMeasurement) {
     ) {
         Text(
             positionNumber.toString(),
-            modifier = Modifier.weight(0.4f), //Modificador del peso de posición
+            modifier = Modifier.weight(0.4f), //Modificador del peso de posición.
             color = Color.White
         )
-        Spacer(modifier = Modifier.width(8.dp)) //Modificador del espacio entre posición y Fecha
+        Spacer(modifier = Modifier.width(8.dp)) //Modificador del espacio entre posición y Fecha.
         Text(
             measurement.date,
-            modifier = Modifier.weight(2f), //Modificador del peso de Fecha
+            modifier = Modifier.weight(2f), //Modificador del peso de Fecha.
             color = Color.White
         )
-        Spacer(modifier = Modifier.width(16.dp)) //Modificador del espacio entre Fecha y Registro
+        Spacer(modifier = Modifier.width(16.dp)) //Modificador del espacio entre Fecha y Registro.
         Text(
             measurement.glucoseValue.toString(),
-            modifier = Modifier.weight(1.5f), //Modificador del peso de Registro
+            modifier = Modifier.weight(1.5f), //Modificador del peso de Registro.
             color = Color.White
         )
     }

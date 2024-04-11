@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,12 +47,12 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import kotlinx.coroutines.delay
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: NavController) {
-    var glucoseValue by remember { mutableStateOf(0) }
+fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: NavController) {
+    var glucoseValue by remember { mutableIntStateOf(0) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
     var lastMeasurement: Int? by remember { mutableStateOf(null) }
@@ -85,7 +86,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
             }
         )
 
-        buttonsHome(
+        ButtonsHome(
             glucoseService = glucoseService,
             navController = navController,
             glucoseValue = glucoseValue,
@@ -127,15 +128,15 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
                 }
             }
             // Muestra la última medición
-            lastMeasure(lastMeasurement = lastMeasurement)
+            LastMeasure(lastMeasurement = lastMeasurement)
         }
 
     }
 }
 
 @Composable
-fun buttonsHome(
-    glucoseService: IGlucoseServices,
+fun ButtonsHome(
+    glucoseService: IGlucoseService,
     navController: NavController,
     glucoseValue: Int,
     keyboardController: SoftwareKeyboardController?,
@@ -239,7 +240,7 @@ private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
                 }
             },
             label = { Text("Ingrese el valor de glucosa") },
-            keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
             isError = isError,
@@ -256,7 +257,7 @@ private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
 
 
 @Composable
-fun lastMeasure(lastMeasurement: Int?) {
+fun LastMeasure(lastMeasurement: Int?) {
 
     lastMeasurement?.let { measurement ->
         val textColor = when (measurement) {

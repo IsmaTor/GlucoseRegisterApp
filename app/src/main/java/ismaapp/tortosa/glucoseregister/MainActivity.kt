@@ -16,20 +16,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ismaapp.tortosa.glucoseregister.helpers.GlucoseDBHelper
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
-import ismaapp.tortosa.glucoseregister.services.GlucoseServicesImp
-import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.services.GlucoseServiceImp
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseHistoryScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseMeasurementScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-
+import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
-    private lateinit var glucoseService: IGlucoseServices
+    private lateinit var glucoseService: IGlucoseService
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -41,7 +41,10 @@ class MainActivity : ComponentActivity() {
 
         databaseGlucose = GlucoseDBHelper(this).writableDatabase
         glucoseRepository = GlucoseRepository(databaseGlucose)
-        glucoseService = GlucoseServicesImp(glucoseRepository)
+        glucoseService =
+            GlucoseServiceImp(
+                glucoseRepository
+            )
 
         setContent {
             MaterialTheme {
@@ -84,6 +87,11 @@ class MainActivity : ComponentActivity() {
                                             orderByLowestGlucose = it
                                         }
                                     )
+                                }
+                            }
+                            composable("configurarTiempoRango") {
+                                Surface(color = Color.DarkGray) {
+                                    GlucoseTimeRangeScreen(glucoseService = glucoseService)
                                 }
                             }
                         }
