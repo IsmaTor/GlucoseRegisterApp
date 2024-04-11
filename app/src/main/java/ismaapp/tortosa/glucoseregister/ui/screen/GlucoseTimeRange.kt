@@ -28,12 +28,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
-import ismaapp.tortosa.glucoseregister.services.GlucosePercentageCalculator
+import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 
 @Composable
-fun GlucoseTimeRangeScreen(glucoseRepository: GlucoseRepository) {
-    val calculator = remember { GlucosePercentageCalculator(glucoseRepository) }
+fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
+    val calculator = remember {
+        TimeRangeServiceImp(
+            glucoseService
+        )
+    }
     val (intervalHours, setIntervalHours) = remember { mutableStateOf(24) }
     val (glucosePercentagesByCategory, setGlucosePercentagesByCategory) = remember { mutableStateOf<Map<String, Double>>(emptyMap()) }
     val (showMessage, setShowMessage) = remember { mutableStateOf(false) }
@@ -194,4 +198,3 @@ fun GlucosePercentageList(glucosePercentagesByCategory: Map<String, Double>) {
         }
     }
 }
-

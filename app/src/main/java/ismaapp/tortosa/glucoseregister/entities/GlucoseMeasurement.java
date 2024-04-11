@@ -1,4 +1,4 @@
-package ismaapp.tortosa.glucoseregister.entity;
+package ismaapp.tortosa.glucoseregister.entities;
 
 public class GlucoseMeasurement {
     private final long id;

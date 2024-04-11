@@ -1,9 +1,9 @@
 package ismaapp.tortosa.glucoseregister.services;
 
 import java.util.List;
-import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement;
+import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 
-public interface IGlucoseServices {
+public interface IGlucoseService {
 
     //Paginated query to the database and returns a list of objects.
     public List<GlucoseMeasurement> getPaginatedGlucoseMeasurements(int offset, int limit, boolean orderByLatest, boolean orderByHighestGlucose, String userSelection);
@@ -14,5 +14,5 @@ public interface IGlucoseServices {
     public boolean isInsertSuccess();
     public int getLastGlucoseMeasurement();
     boolean isDatabaseEmptyOrNull();
-
+    List<GlucoseMeasurement> getAllGlucoseMeasurements();
 }

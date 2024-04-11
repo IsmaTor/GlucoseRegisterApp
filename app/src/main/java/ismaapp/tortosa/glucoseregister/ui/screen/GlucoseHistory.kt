@@ -35,12 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import ismaapp.tortosa.glucoseregister.entity.GlucoseMeasurement
-import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 
 @Composable
 fun GlucoseHistoryScreen(
-    glucoseService: IGlucoseServices,
+    glucoseService: IGlucoseService,
     pageNumber: Int,
     navController: NavController,
     orderByLatest: Boolean,

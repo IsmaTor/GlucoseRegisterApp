@@ -47,11 +47,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import ismaapp.tortosa.glucoseregister.services.IGlucoseServices
+import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import kotlinx.coroutines.delay
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: NavController) {
+fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: NavController) {
     var glucoseValue by remember { mutableIntStateOf(0) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -136,7 +136,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseServices, navController: Na
 
 @Composable
 fun ButtonsHome(
-    glucoseService: IGlucoseServices,
+    glucoseService: IGlucoseService,
     navController: NavController,
     glucoseValue: Int,
     keyboardController: SoftwareKeyboardController?,
