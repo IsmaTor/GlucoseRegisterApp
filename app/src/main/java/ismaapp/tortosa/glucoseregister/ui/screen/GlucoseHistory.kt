@@ -93,7 +93,7 @@ fun GlucoseHistoryScreen(
         //Botón para el tiempo de rango.
         Button(
             onClick = {
-                navController.navigate("configurarTiempoRango")
+                navController.navigate("rangeTime")
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -239,10 +239,11 @@ fun NavigationButtons(
             modifier = Modifier
                 .weight(1.1f)
                 .heightIn(min = 24.dp)
-                .padding(8.dp)
+                .padding(7.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("ANTERIOR")
+            Text("ANTERIOR",
+                fontSize = 14.sp) //Tamaño del texto.
         }
 
         Button(
@@ -265,10 +266,11 @@ fun NavigationButtons(
             modifier = Modifier
                 .weight(1.1f)
                 .heightIn(min = 24.dp)
-                .padding(8.dp)
+                .padding(7.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("SIGUIENTE")
+            Text("SIGUIENTE",
+                fontSize = 14.sp) //Tamaño del texto.
         }
     }
 }
