@@ -19,7 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -200,9 +200,9 @@ fun ButtonsHome(
         }
         Button(
             onClick = {
-                // Obtener la última medición de la base de datos
-                val updatedLastMeasurement = glucoseService.lastGlucoseMeasurement
-                onLastMeasurementUpdated(updatedLastMeasurement)
+                navController.navigate("graphic") {
+                    launchSingleTop = true
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -210,9 +210,9 @@ fun ButtonsHome(
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = null)
+            Icon(Icons.Default.Info, contentDescription = null)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Actualizar")
+            Text("Gráficas")
         }
     }
 }

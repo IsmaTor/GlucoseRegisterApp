@@ -1,17 +1,14 @@
 package ismaapp.tortosa.glucoseregister.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
@@ -22,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.utils.buttonModifier
 
 @Composable
 fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
@@ -61,12 +58,7 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = if (intervalHours == 1) Color.Blue else Color.DarkGray)
+            buttonModifier(selected = intervalHours == 1)
         ) {
             Text("1 HORA", color = Color.White)
         }
@@ -79,12 +71,7 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = if (intervalHours == 24) Color.Blue else Color.DarkGray)
+            buttonModifier(selected = intervalHours == 24)
         ) {
             Text("24 HORAS", color = Color.White)
         }
@@ -97,12 +84,7 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = if (intervalHours == 168) Color.Blue else Color.DarkGray)
+            buttonModifier(selected = intervalHours == 168)
         ) {
             Text("7 DÍAS", color = Color.White)
         }
@@ -115,12 +97,7 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = if (intervalHours == 720) Color.Blue else Color.DarkGray)
+            buttonModifier(selected = intervalHours == 720)
         ) {
             Text("30 DÍAS", color = Color.White)
         }

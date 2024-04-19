@@ -25,7 +25,7 @@ public class TimeRangeServiceImp implements ITimeRangeService{
         try {
             List<GlucoseMeasurement> glucoseMeasurements = glucoseService.getAllGlucoseMeasurements();
 
-            LocalDateTime now = LocalDateTime.now(); //Fecha y hora actual
+            LocalDateTime now = LocalDateTime.now(); //Fecha y hora actual.
 
             Map<LocalDateTime, List<GlucoseMeasurement>> groupedMeasurements = groupGlucoseByTimeInterval(glucoseMeasurements, intervalHours, now);
 
@@ -64,6 +64,30 @@ public class TimeRangeServiceImp implements ITimeRangeService{
         }
 
         return glucosePercentages;
+    }
+
+    @Override
+    public List<GlucoseMeasurement> getLastDays(int intervalHours) {
+        List<GlucoseMeasurement> glucoseMeasurementsWithoutPercentage = new ArrayList<>();
+
+        try {
+            List<GlucoseMeasurement> glucoseMeasurements = glucoseService.getAllGlucoseMeasurements();
+
+            LocalDateTime now = LocalDateTime.now(); // Fecha y hora actual.
+
+            Map<LocalDateTime, List<GlucoseMeasurement>> groupedMeasurements = groupGlucoseByTimeInterval(glucoseMeasurements, intervalHours, now);
+
+            for (List<GlucoseMeasurement> measurementsInInterval : groupedMeasurements.values()) {
+                if (!measurementsInInterval.isEmpty()) {
+                    glucoseMeasurementsWithoutPercentage.addAll(measurementsInInterval);
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e(LOG_NAME, "Error retrieving glucose measurements without percentages: " + e.getMessage());
+        }
+
+        return glucoseMeasurementsWithoutPercentage;
     }
 
     private Map<LocalDateTime, List<GlucoseMeasurement>> groupGlucoseByTimeInterval(

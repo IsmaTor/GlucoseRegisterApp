@@ -24,7 +24,9 @@ import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
+import ismaapp.tortosa.glucoseregister.ui.screen.GraphicsScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
@@ -89,9 +91,24 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            composable("configurarTiempoRango") {
+                            composable("rangeTime") {
                                 Surface(color = Color.DarkGray) {
                                     GlucoseTimeRangeScreen(glucoseService = glucoseService)
+                                }
+                            }
+                            composable("graphic") {
+                                Surface(color = Color.DarkGray) {
+                                    GraphicsScreen(glucoseService = glucoseService, navController = navController)
+                                }
+                            }
+                            composable("graphicDetail/{intervalHours}") { navBackStackEntry ->
+                                val intervalHours = navBackStackEntry.arguments?.getString("intervalHours")?.toInt() ?: 0
+                                Surface(
+                                    color = Color.DarkGray
+                                    ) {
+                                    GraphicDetailScreen(glucoseService, intervalHours, onNavigateBack = {
+                                        navController.popBackStack()
+                                    })
                                 }
                             }
                         }
