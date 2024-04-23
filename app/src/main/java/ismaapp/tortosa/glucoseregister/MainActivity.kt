@@ -24,6 +24,7 @@ import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicsScreen
@@ -109,6 +110,11 @@ class MainActivity : ComponentActivity() {
                                     GraphicDetailScreen(glucoseService, intervalHours, onNavigateBack = {
                                         navController.popBackStack()
                                     })
+                                }
+                            }
+                            composable("options") {
+                                Surface(color = Color.DarkGray) {
+                                    GlucoseOptionsScreen(glucoseService = glucoseService)
                                 }
                             }
                         }

@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -55,8 +54,6 @@ fun GlucoseHistoryScreen(
 
     var userSelection by remember { mutableStateOf("FECHA") }
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
-    var showDialog by remember { mutableStateOf(false) }
-    val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
     val pageSize = 12
     val startIndex = (pageNumber - 1) * pageSize
     val calculatedPageNumber = (startIndex / pageSize) + 1
@@ -75,19 +72,18 @@ fun GlucoseHistoryScreen(
             color = Color.White
         )
 
-        // Botón para borrar todas las mediciones.
+        //Botón para mostrar opciones de borrar o imprimir.
         Button(
             onClick = {
-                showDialog = true
+                navController.navigate("options")
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(2.dp)
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(color = darkRed)
         ) {
-            Text("BORRAR TODAS LAS MEDICIONES", color = Color.White)
+            Text("OPCIONES", color = Color.White)
         }
 
         //Botón para el tiempo de rango.
@@ -103,18 +99,6 @@ fun GlucoseHistoryScreen(
         ) {
             Text("VER TIEMPO DE RANGO", color = Color.White)
         }
-
-
-        ConfirmDeleteDialog(
-            showDialog = showDialog,
-            onDismiss = { showDialog = false },
-            onConfirm = {
-                glucoseService.deleteAllGlucoseMeasurements()
-                glucoseMeasurements = emptyList()
-                showDialog = false
-            },
-            isDatabaseEmptyOrNull = glucoseService::isDatabaseEmptyOrNull
-        )
 
         LazyColumn {
             item {
@@ -177,47 +161,6 @@ fun GlucoseHistoryScreen(
         NavigationButtons(pageNumber = pageNumber, navController = navController)
     }
 }
-
-@Composable
-fun ConfirmDeleteDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    isDatabaseEmptyOrNull: () -> Boolean
-) {
-    if (showDialog) {
-        val emptyOrNull = isDatabaseEmptyOrNull()
-        if (emptyOrNull) {
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(text = "ERROR") },
-                text = { Text("La base de datos está vacía o nula.") },
-                confirmButton = {
-                    Button(onClick = onDismiss) {
-                        Text("OK")
-                    }
-                }
-            )
-        } else {
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(text = "Confirmación") },
-                text = { Text("¿Estás seguro de que quieres borrar todas las mediciones?") },
-                confirmButton = {
-                    Button(onClick = onConfirm) {
-                        Text("Sí")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = onDismiss) {
-                        Text("No")
-                    }
-                }
-            )
-        }
-    }
-}
-
 
 @Composable
 fun NavigationButtons(
