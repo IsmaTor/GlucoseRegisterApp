@@ -110,7 +110,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: Nav
                 .padding(8.dp)
         ) {
             if (showMessage) {
-                // Muestra el mensaje
+                //Muestra el mensaje.
                 val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
                 val color = if (isMeasurementSuccessful) Color.Green else Color.Red
 
@@ -122,7 +122,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: Nav
                         .zIndex(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(icon, contentDescription = null, tint = Color.White)
+                    Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(message, color = Color.White)
                 }
@@ -177,9 +177,9 @@ fun ButtonsHome(
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "register")
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Registrar")
+            Text("  Registrar")
         }
         Button(
             onClick = {
@@ -194,9 +194,9 @@ fun ButtonsHome(
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Icon(Icons.Default.DateRange, contentDescription = null)
+            Icon(Icons.Default.DateRange, contentDescription = "historical")
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Historial")
+            Text("  Historial")
         }
         Button(
             onClick = {
@@ -210,9 +210,9 @@ fun ButtonsHome(
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Icon(Icons.Default.Info, contentDescription = null)
+            Icon(Icons.Default.Info, contentDescription = "graphical")
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Gráficas")
+            Text("  Gráficas")
         }
     }
 }

@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,9 +35,9 @@ import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 fun GlucoseOptionsScreen(
     glucoseService: IGlucoseService,
 ) {
-    val deleteAll = "BORRAR REGISTROS"
-    val deleteLast = "BORRAR ÚLTIMA"
-    val print = "IMPRIMIR"
+    val deleteAll = " BORRAR REGISTROS"
+    val deleteLast = " BORRAR ÚLTIMA"
+    val print = " IMPRIMIR"
 
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
@@ -72,6 +76,7 @@ fun GlucoseOptionsScreen(
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = darkRed)
         ) {
+            Icon(Icons.Filled.Delete, contentDescription = "deleteAll")
             Text(deleteAll, color = Color.White)
         }
 
@@ -88,6 +93,7 @@ fun GlucoseOptionsScreen(
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = darkRed)
         ) {
+            Icon(Icons.Filled.Delete, contentDescription = "deleteLast")
             Text(deleteLast, color = Color.White)
         }
 
@@ -112,10 +118,10 @@ fun GlucoseOptionsScreen(
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("IMPRIMIR", color = Color.White)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = "print")
+            Text(print, color = Color.White)
         }
 
-        //lógica para borrado.
         ConfirmDeleteDialogOptions(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
@@ -127,13 +133,13 @@ fun GlucoseOptionsScreen(
                     }
                     deleteLast -> {
                         if (glucoseMeasurements.isNotEmpty()) {
-                            //lógica para eliminar el último registro por hacer en el service.
+                            //implementar lógica para eliminar el último registro por hacer en el service.
                             glucoseMeasurements = glucoseMeasurements.dropLast(1)
                         }
                     }
                     print -> {
                         if (glucoseMeasurements.isNotEmpty()) {
-                            //lógica para imprimir
+                            //implementar lógica para imprimir
                             glucoseMeasurements = glucoseMeasurements.dropLast(2)
                         }
                     }
@@ -169,9 +175,9 @@ fun ConfirmDeleteDialogOptions(
             )
         } else {
             val confirmationMessage = when (userSelection) {
-                "BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
-                "BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
-                "IMPRIMIR" -> "¿Imprimir los últimos 30 días?"
+                " BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
+                " BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
+                " IMPRIMIR" -> "¿Imprimir los últimos 30 días?"
                 else -> ""
             }
 

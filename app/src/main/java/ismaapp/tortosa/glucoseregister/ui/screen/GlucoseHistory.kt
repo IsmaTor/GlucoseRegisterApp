@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -83,7 +85,9 @@ fun GlucoseHistoryScreen(
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("OPCIONES", color = Color.White)
+            Icon(Icons.Filled.Menu, contentDescription = "Menú")
+            Text("   OPCIONES", color = Color.White)
+
         }
 
         //Botón para el tiempo de rango.
@@ -97,7 +101,7 @@ fun GlucoseHistoryScreen(
                 .heightIn(min = 24.dp)
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Text("VER TIEMPO DE RANGO", color = Color.White)
+            Text("   VER TIEMPO DE RANGO", color = Color.White)
         }
 
         LazyColumn {
