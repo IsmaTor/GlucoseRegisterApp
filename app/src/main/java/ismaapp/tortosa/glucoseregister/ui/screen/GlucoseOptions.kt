@@ -37,11 +37,11 @@ fun GlucoseOptionsScreen(
 ) {
     val deleteAll = " BORRAR REGISTROS"
     val deleteLast = " BORRAR ÚLTIMA"
-    val print = " IMPRIMIR"
+    val print = " DESCARGAR"
+    val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
 
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
-    val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
     var userSelection by remember { mutableStateOf(deleteAll) }
 
     Column(
@@ -100,7 +100,7 @@ fun GlucoseOptionsScreen(
         Spacer(modifier = Modifier.height(40.dp))
 
         Text(
-            "Opciones de imprimir",
+            "Opciones de descarga",
             style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -174,7 +174,7 @@ fun ConfirmDeleteDialogOptions(
             val confirmationMessage = when (userSelection) {
                 " BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
                 " BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
-                " IMPRIMIR" -> "¿Imprimir los últimos 30 días?"
+                " DESCARGAR" -> "¿Descargar los últimos 30 días?"
                 else -> ""
             }
 

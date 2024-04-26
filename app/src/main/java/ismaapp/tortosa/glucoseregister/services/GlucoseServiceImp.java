@@ -18,6 +18,14 @@ public class GlucoseServiceImp implements IGlucoseService {
     private final GlucoseRepository glucoseRepository;
     private static final String ORDER_BY = " ORDER BY ";
     private static final String LOG_NAME = "GlucoseRepository";
+    private static final String QUERY_LAST_MEASURE = "SELECT " + GlucoseDBHelper.COLUMN_ID +
+            " FROM " + GlucoseDBHelper.TABLE_NAME +
+            ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
+            GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
+    private static final String QUERY_LAST_VALUE = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
+            " FROM " + GlucoseDBHelper.TABLE_NAME +
+            ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
+            GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
     private boolean lastInsertSuccess = false;
 
     public GlucoseServiceImp(GlucoseRepository glucoseRepository) {
@@ -31,7 +39,7 @@ public class GlucoseServiceImp implements IGlucoseService {
         String order = buildOrderByClause(orderByLatest, orderByHighestGlucose, userSelection);
         String query = "SELECT * FROM " + GlucoseDBHelper.TABLE_NAME +
                 order + " LIMIT " + limit + " OFFSET " + offset;
-        try (Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null)) {
+        try (Cursor cursor = executeQuery(query)) {
             glucoseMeasurements = extractGlucoseMeasurementsFromCursor(cursor);
         } catch (SQLiteException e) {
             logError("Error executing database query", e);
@@ -81,46 +89,34 @@ public class GlucoseServiceImp implements IGlucoseService {
 
     public void deleteLastMeasure() {
         try {
-            // Consultar la última entrada
-            String query = "SELECT " + GlucoseDBHelper.COLUMN_ID +
-                    " FROM " + GlucoseDBHelper.TABLE_NAME +
-                    " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
-                    GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
-
-            Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
+            Cursor cursor = executeQuery(QUERY_LAST_MEASURE);
 
             if (cursor != null && cursor.moveToFirst()) {
                 // Verificar si la columna está presente en el cursor
                 int columnIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
                 if (columnIndex != -1) {
-                    // Obtener el ID de la última entrada
-                    int lastEntryId = cursor.getInt(columnIndex);
-
+                    int lastEntryId = cursor.getInt(columnIndex); //Obtener el ID de la última entrada.
                     // Eliminar la última entrada por su ID
                     String whereClause = GlucoseDBHelper.COLUMN_ID + " = ?";
                     String[] whereArgs = { String.valueOf(lastEntryId) };
 
                     int rowsAffected = glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, whereClause, whereArgs);
 
+                    //Comprobaciones de exito.
                     if (rowsAffected > 0) {
-                        // Éxito: la última entrada fue eliminada
-                        Log.d(TAG, "Última entrada eliminada satisfactoriamente");
+                        Log.d(TAG, "Last entry successfully deleted");
                     } else {
-                        // No se eliminó ninguna fila (puede ocurrir si el ID no existe)
-                        Log.d(TAG, "No se pudo eliminar la última entrada");
+                        Log.d(TAG, "Could not delete last entry");
                     }
                 } else {
-                    // La columna no fue encontrada en el cursor
-                    Log.e(TAG, "La columna " + GlucoseDBHelper.COLUMN_ID + " no está presente en el cursor");
+                    Log.e(TAG, "Column " + GlucoseDBHelper.COLUMN_ID + " not present in the cursor");
                 }
             }
-
             if (cursor != null) {
                 cursor.close();
             }
         } catch (Exception e) {
-            // Manejo de errores
-            Log.e(TAG, "Error al eliminar la última entrada: " + e.getMessage(), e);
+            Log.e(TAG, "Error when deleting last entry: " + e.getMessage(), e);
         }
     }
 
@@ -128,11 +124,7 @@ public class GlucoseServiceImp implements IGlucoseService {
     public int getLastGlucoseMeasurement() {
         int lastGlucoseMeasurement = 0;
         try {
-            String query = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
-                    " FROM " + GlucoseDBHelper.TABLE_NAME +
-                    ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
-                    GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
-            Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
+            Cursor cursor = executeQuery(QUERY_LAST_VALUE);
             if (cursor != null && cursor.moveToFirst()) {
                 int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
                 if (glucoseValueIndex != -1) {
@@ -190,13 +182,24 @@ public class GlucoseServiceImp implements IGlucoseService {
         return glucoseMeasurements;
     }
 
+    //Methods Utils
+    private Cursor executeQuery(String query) {
+        Cursor cursor = null;
+        try {
+            cursor = glucoseRepository.getDatabase().rawQuery(query, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Error executing query: " + e.getMessage(), e);
+        }
+        return cursor;
+    }
+
     private String buildOrderByClause(boolean orderByLatest, boolean orderByHighestGlucose, String userSelection) {
         if (userSelection.equals("FECHA")) {
             return ORDER_BY + GlucoseDBHelper.COLUMN_DATE + (orderByLatest ? " DESC" : " ASC");
         } else if (userSelection.equals("REGISTRO")) {
             return ORDER_BY + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE + (orderByHighestGlucose ? " DESC" : " ASC");
         }
-        return ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " ASC"; // Default order
+        return ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " ASC"; //Retorna por defecto.
     }
 
     private List<GlucoseMeasurement> extractGlucoseMeasurementsFromCursor(Cursor cursor) {
@@ -230,4 +233,3 @@ public class GlucoseServiceImp implements IGlucoseService {
         Log.d(LOG_NAME, message);
     }
 }
-
