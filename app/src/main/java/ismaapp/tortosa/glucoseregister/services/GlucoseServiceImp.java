@@ -1,5 +1,7 @@
 package ismaapp.tortosa.glucoseregister.services;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -74,6 +76,51 @@ public class GlucoseServiceImp implements IGlucoseService {
             logDebug("All glucose measurements deleted successfully.");
         } catch (SQLiteException e) {
             logError("Error deleting all glucose measurements", e);
+        }
+    }
+
+    public void deleteLastMeasure() {
+        try {
+            // Consultar la última entrada
+            String query = "SELECT " + GlucoseDBHelper.COLUMN_ID +
+                    " FROM " + GlucoseDBHelper.TABLE_NAME +
+                    " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
+                    GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
+
+            Cursor cursor = glucoseRepository.getDatabase().rawQuery(query, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                // Verificar si la columna está presente en el cursor
+                int columnIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
+                if (columnIndex != -1) {
+                    // Obtener el ID de la última entrada
+                    int lastEntryId = cursor.getInt(columnIndex);
+
+                    // Eliminar la última entrada por su ID
+                    String whereClause = GlucoseDBHelper.COLUMN_ID + " = ?";
+                    String[] whereArgs = { String.valueOf(lastEntryId) };
+
+                    int rowsAffected = glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, whereClause, whereArgs);
+
+                    if (rowsAffected > 0) {
+                        // Éxito: la última entrada fue eliminada
+                        Log.d(TAG, "Última entrada eliminada satisfactoriamente");
+                    } else {
+                        // No se eliminó ninguna fila (puede ocurrir si el ID no existe)
+                        Log.d(TAG, "No se pudo eliminar la última entrada");
+                    }
+                } else {
+                    // La columna no fue encontrada en el cursor
+                    Log.e(TAG, "La columna " + GlucoseDBHelper.COLUMN_ID + " no está presente en el cursor");
+                }
+            }
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        } catch (Exception e) {
+            // Manejo de errores
+            Log.e(TAG, "Error al eliminar la última entrada: " + e.getMessage(), e);
         }
     }
 

@@ -132,10 +132,7 @@ fun GlucoseOptionsScreen(
                         glucoseMeasurements = emptyList()
                     }
                     deleteLast -> {
-                        if (glucoseMeasurements.isNotEmpty()) {
-                            //implementar lógica para eliminar el último registro por hacer en el service.
-                            glucoseMeasurements = glucoseMeasurements.dropLast(1)
-                        }
+                            glucoseService.deleteLastMeasure()
                     }
                     print -> {
                         if (glucoseMeasurements.isNotEmpty()) {
