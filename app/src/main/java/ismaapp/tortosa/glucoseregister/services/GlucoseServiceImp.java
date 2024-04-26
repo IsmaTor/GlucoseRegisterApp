@@ -26,7 +26,7 @@ public class GlucoseServiceImp implements IGlucoseService {
             " FROM " + GlucoseDBHelper.TABLE_NAME +
             ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
             GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
-    private boolean lastInsertSuccess = false;
+    private boolean actionSuccess = false;
 
     public GlucoseServiceImp(GlucoseRepository glucoseRepository) {
         this.glucoseRepository = glucoseRepository;
@@ -57,14 +57,14 @@ public class GlucoseServiceImp implements IGlucoseService {
                 values.put(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE, glucoseValue);
                 values.put(GlucoseDBHelper.COLUMN_DATE, date);
                 long newRowId = glucoseRepository.getDatabase().insert(GlucoseDBHelper.TABLE_NAME, null, values);
-                lastInsertSuccess = newRowId != -1;
-                if (lastInsertSuccess) {
+                actionSuccess = newRowId != -1;
+                if (actionSuccess) {
                     logDebug("Register inserted successfully, ID: " + newRowId + ", date: " + date);
                 } else {
                     logError("Error inserting register into database", null);
                 }
             } else {
-                lastInsertSuccess = false;
+                actionSuccess = false;
                 logError("Cannot insert glucose measurement with value 0", null);
             }
         } catch (Exception e) {
@@ -73,17 +73,22 @@ public class GlucoseServiceImp implements IGlucoseService {
     }
 
     @Override
-    public boolean isInsertSuccess() {
-        return lastInsertSuccess;
+    public boolean isActionSuccess() {
+        return actionSuccess;
     }
 
     @Override
     public void deleteAllGlucoseMeasurements() {
         try {
-            glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, null, null);
-            logDebug("All glucose measurements deleted successfully.");
+            int rowsAffected = glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, null, null);
+            actionSuccess = rowsAffected > 0;
+            if (actionSuccess) {
+                Log.d(TAG, "All glucose measurements deleted successfully.");
+            } else {
+                Log.d(TAG, "No glucose measurements deleted.");
+            }
         } catch (SQLiteException e) {
-            logError("Error deleting all glucose measurements", e);
+            Log.e(TAG, "Error deleting all glucose measurements", e);
         }
     }
 
@@ -92,18 +97,17 @@ public class GlucoseServiceImp implements IGlucoseService {
             Cursor cursor = executeQuery(QUERY_LAST_MEASURE);
 
             if (cursor != null && cursor.moveToFirst()) {
-                // Verificar si la columna está presente en el cursor
                 int columnIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_ID);
                 if (columnIndex != -1) {
-                    int lastEntryId = cursor.getInt(columnIndex); //Obtener el ID de la última entrada.
-                    // Eliminar la última entrada por su ID
+                    int lastEntryId = cursor.getInt(columnIndex);
                     String whereClause = GlucoseDBHelper.COLUMN_ID + " = ?";
                     String[] whereArgs = { String.valueOf(lastEntryId) };
 
                     int rowsAffected = glucoseRepository.getDatabase().delete(GlucoseDBHelper.TABLE_NAME, whereClause, whereArgs);
 
-                    //Comprobaciones de exito.
-                    if (rowsAffected > 0) {
+                    // Actualizar el estado de éxito de la operación
+                    actionSuccess = rowsAffected > 0;
+                    if (actionSuccess) {
                         Log.d(TAG, "Last entry successfully deleted");
                     } else {
                         Log.d(TAG, "Could not delete last entry");
@@ -112,6 +116,7 @@ public class GlucoseServiceImp implements IGlucoseService {
                     Log.e(TAG, "Column " + GlucoseDBHelper.COLUMN_ID + " not present in the cursor");
                 }
             }
+
             if (cursor != null) {
                 cursor.close();
             }
