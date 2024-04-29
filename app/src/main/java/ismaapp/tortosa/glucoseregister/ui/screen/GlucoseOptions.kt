@@ -45,7 +45,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun GlucoseOptionsScreen(
     glucoseService: IGlucoseService,
-    printService: IPrintService
+    printService: IPrintService,
+    context: Context
 ) {
     val deleteAll = " BORRAR REGISTROS"
     val deleteLast = " BORRAR ÚLTIMA"
@@ -138,7 +139,7 @@ fun GlucoseOptionsScreen(
                         glucoseService.deleteLastMeasure()
                     }
                     print -> {
-                        printService.generatePDF(glucoseMeasurements)
+                        printService.generatePDF(context, glucoseMeasurements)
                     }
                 }
                 showDialog = false
