@@ -2,10 +2,8 @@ package ismaapp.tortosa.glucoseregister
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
@@ -32,11 +30,7 @@ import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicsScreen
-
-import android.Manifest
-import android.content.pm.PackageManager
-
-import androidx.core.content.ContextCompat
+import ismaapp.tortosa.glucoseregister.utils.PermissionManager
 
 class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
@@ -49,18 +43,6 @@ class MainActivity : ComponentActivity() {
     private var orderByHighestGlucose by mutableStateOf(true)
     private var orderByLowestGlucose by mutableStateOf(true)
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                // Permiso concedido, realiza la acción necesaria aquí
-                Toast.makeText(this, "Permiso de almacenamiento concedido", Toast.LENGTH_SHORT).show()
-                // Por ejemplo, llama a una función para continuar con tu lógica
-            } else {
-                // Permiso denegado, muestra un mensaje o toma una acción alternativa
-                Toast.makeText(this, "Permiso de almacenamiento denegado", Toast.LENGTH_SHORT).show()
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,8 +51,10 @@ class MainActivity : ComponentActivity() {
         glucoseService = GlucoseServiceImp(glucoseRepository)
         printService = PrintServiceImp(glucoseService)
 
-        // Verificar y solicitar permiso de escritura en almacenamiento externo
-        checkStoragePermission()
+        if (!PermissionManager.checkStoragePermission(this)) {
+            // Si no se tiene el permiso, solicitarlo al usuario
+            PermissionManager.requestStoragePermission(this);
+        }
 
         setContent {
             MaterialTheme {
@@ -122,22 +106,34 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("graphic") {
                                 Surface(color = Color.DarkGray) {
-                                    GraphicsScreen(glucoseService = glucoseService, navController = navController)
+                                    GraphicsScreen(
+                                        glucoseService = glucoseService,
+                                        navController = navController
+                                    )
                                 }
                             }
                             composable("graphicDetail/{intervalHours}") { navBackStackEntry ->
-                                val intervalHours = navBackStackEntry.arguments?.getString("intervalHours")?.toInt() ?: 0
+                                val intervalHours =
+                                    navBackStackEntry.arguments?.getString("intervalHours")?.toInt()
+                                        ?: 0
                                 Surface(
                                     color = Color.DarkGray
-                                    ) {
-                                    GraphicDetailScreen(glucoseService, intervalHours, onNavigateBack = {
-                                        navController.popBackStack()
-                                    })
+                                ) {
+                                    GraphicDetailScreen(
+                                        glucoseService,
+                                        intervalHours,
+                                        onNavigateBack = {
+                                            navController.popBackStack()
+                                        })
                                 }
                             }
                             composable("options") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseOptionsScreen(glucoseService = glucoseService, printService = printService, context = applicationContext)
+                                    GlucoseOptionsScreen(
+                                        glucoseService = glucoseService,
+                                        printService = printService,
+                                        context = applicationContext
+                                    )
                                 }
                             }
                         }
@@ -145,28 +141,14 @@ class MainActivity : ComponentActivity() {
                 })
             }
         }
-        checkStoragePermission()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         databaseGlucose.close()
     }
-
-    private fun checkStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Permiso no concedido, solicitarlo
-            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        } else {
-            // Permiso ya concedido, realiza la acción necesaria aquí
-            Toast.makeText(this, "Permiso de almacenamiento ya concedido", Toast.LENGTH_SHORT).show()
-            // Por ejemplo, llama a una función para continuar con tu lógica
-        }
-    }
 }
+
+
 
 

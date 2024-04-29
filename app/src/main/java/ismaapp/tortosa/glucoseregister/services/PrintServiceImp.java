@@ -16,6 +16,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -37,68 +38,47 @@ public class PrintServiceImp implements IPrintService {
     }
 
     public File generatePDF(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
-        List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
-
-        // Obtener las mediciones de glucosa si la lista está vacía
-        if (measurements.isEmpty()) {
-            measurements = glucoseService.getAllGlucoseMeasurements();
+        if (glucoseMeasurements.isEmpty()) {
+            // Si la lista de mediciones está vacía, obtén las mediciones del servicio
+            glucoseMeasurements = glucoseService.getAllGlucoseMeasurements();
         }
 
-        // Crear un nombre de archivo único para el PDF
         String pdfFileName = "glucose_records.pdf";
 
-        // Obtener el directorio de descargas usando MediaStore
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        // Obtener el directorio específico de la aplicación para almacenamiento externo
+        File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
 
-        // Crear un ContentValues para el nuevo archivo en MediaStore
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, pdfFileName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
-        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+        if (externalFilesDir != null) {
+            File pdfFile = new File(externalFilesDir, pdfFileName);
 
-        ContentResolver resolver = context.getContentResolver();
-        Uri outputFileUri = resolver.insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), contentValues);
-
-        if (outputFileUri != null) {
             try {
-                OutputStream outputStream = resolver.openOutputStream(outputFileUri);
-                if (outputStream != null) {
-                    // Crear el documento PDF
-                    Document document = new Document();
-                    PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+                FileOutputStream outputStream = new FileOutputStream(pdfFile);
+                Document document = new Document();
+                PdfWriter writer = PdfWriter.getInstance(document, outputStream);
 
-                    // Encriptar el PDF con una contraseña
-                    writer.setEncryption("11235DV".getBytes(), null,
-                            PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128 | PdfWriter.STANDARD_ENCRYPTION_128);
+                // Encriptar el PDF con una contraseña
+                writer.setEncryption("11235DV".getBytes(), null,
+                        PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128 | PdfWriter.STANDARD_ENCRYPTION_128);
 
-                    document.open();
+                document.open();
 
-                    // Agregar contenido al documento PDF
-                    addContentToPDF(document, measurements);
+                // Agregar contenido al documento PDF
+                addContentToPDF(document, glucoseMeasurements);
 
-                    document.close();
-                    outputStream.close();
+                document.close();
+                outputStream.close();
 
-                    // Verificar la existencia y tamaño del archivo PDF
-                    File pdfFile = new File(downloadsDirectory, pdfFileName);
-                    if (pdfFile.exists() && pdfFile.length() > 0) {
-                        downloadSuccess = true;
-                        Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
-                        Toast.makeText(context, "PDF generado exitosamente", Toast.LENGTH_SHORT).show();
-                        return pdfFile;
-                    } else {
-                        downloadSuccess = false;
-                        Log.e(CLASS_NAME, "ERROR: El archivo PDF no se generó correctamente");
-                        Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
-                    }
-                }
+                Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
+                Toast.makeText(context, "PDF generado exitosamente", Toast.LENGTH_SHORT).show();
+
+                return pdfFile; // Devuelve el archivo PDF generado
             } catch (IOException | DocumentException e) {
                 Log.e(CLASS_NAME, "Error generando el PDF: " + e.getMessage(), e);
                 Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Log.e(CLASS_NAME, "ERROR: No se pudo crear el archivo en MediaStore");
-            Toast.makeText(context, "Error al crear el archivo en MediaStore", Toast.LENGTH_SHORT).show();
+            Log.e(CLASS_NAME, "Directorio externo no disponible para almacenamiento");
+            Toast.makeText(context, "Error: Directorio externo no disponible", Toast.LENGTH_SHORT).show();
         }
 
         return null;
