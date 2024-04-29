@@ -5,8 +5,8 @@ import java.util.List;
 
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 
-public interface IPrintService extends IBaseService{
-    //boolean isActionSuccess();
+public interface IPrintService {
+    boolean isDownloadSuccess();
 
     File generatePDF(List<GlucoseMeasurement> glucoseMeasurements);
 }

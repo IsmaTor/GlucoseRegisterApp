@@ -18,15 +18,15 @@ import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 public class PrintServiceImp implements IPrintService {
     private final IGlucoseService glucoseService;
     private static final String CLASS_NAME = "PrintServiceImp";
-    private boolean actionSuccess = false;
+    private boolean downloadSuccess = false;
 
     public PrintServiceImp (IGlucoseService glucoseService) {
         this.glucoseService = glucoseService;
     }
 
     @Override
-    public boolean isActionSuccess() {
-        return actionSuccess;
+    public boolean isDownloadSuccess() {
+        return downloadSuccess;
     }
 
     @Override
@@ -49,10 +49,10 @@ public class PrintServiceImp implements IPrintService {
 
             // Verificar la existencia del archivo PDF después de cerrar el documento.
             if (pdfFile.exists() && pdfFile.length() > 0) {
-                actionSuccess = true;
+                downloadSuccess = true;
                 Log.d(CLASS_NAME, "PDF creado con éxito en: " + pdfFilePath);
             } else {
-                actionSuccess = false;
+                downloadSuccess = false;
                 Log.e(CLASS_NAME, "ERROR: El archivo PDF no se ha generado correctamente.");
             }
 

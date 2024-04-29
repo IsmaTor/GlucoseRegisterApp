@@ -39,6 +39,7 @@ import androidx.compose.ui.zIndex
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
+import ismaapp.tortosa.glucoseregister.utils.params.DialogOptionsParams
 import kotlinx.coroutines.delay
 
 @Composable
@@ -145,8 +146,9 @@ fun GlucoseOptionsScreen(
             Text(print, color = Color.White)
         }
 
-        ConfirmDeleteDialogOptions(
+        val dialogOptionsParams = DialogOptionsParams(
             glucoseService = glucoseService,
+            printService = printService,
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = {
@@ -172,6 +174,8 @@ fun GlucoseOptionsScreen(
                 message = newMessage
             }
         )
+        
+        ConfirmDeleteDialogOptions(dialogOptionsParams = dialogOptionsParams)
 
         SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
 
@@ -212,59 +216,56 @@ fun SuccessfulMessage(
 
 @Composable
 fun ConfirmDeleteDialogOptions(
-    glucoseService: IGlucoseService,
-    onMeasurementsDeleted: (Boolean, String) -> Unit,
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    userSelection: String,
-    isDatabaseEmptyOrNull: () -> Boolean
+    dialogOptionsParams: DialogOptionsParams
 ) {
-    if (showDialog) {
-        val emptyOrNull = isDatabaseEmptyOrNull()
-        if (emptyOrNull) {
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(text = "ERROR") },
-                text = { Text("La base de datos está vacía o nula.") },
-                confirmButton = {
-                    Button(onClick = onDismiss) {
-                        Text("OK")
-                    }
-                }
-            )
-        } else {
-            val confirmationMessage = when (userSelection) {
-                " BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
-                " BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
-                " DESCARGAR" -> "¿Descargar los últimos 30 días?"
-                else -> ""
-            }
-
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(text = "Confirmación") },
-                text = { Text(confirmationMessage) },
-                confirmButton = {
-                    Button(onClick = {
-                        onConfirm()
-                        val isInsertSuccessful = glucoseService.isActionSuccess
-
-                        if (isInsertSuccessful) {
-                            onMeasurementsDeleted(true, "Proceso correcto.")
-                        } else {
-                            onMeasurementsDeleted(false, "ERROR al realizar el proceso.")
+    with(dialogOptionsParams) {
+        if (showDialog) {
+            val emptyOrNull = isDatabaseEmptyOrNull()
+            if (emptyOrNull) {
+                AlertDialog(
+                    onDismissRequest = onDismiss,
+                    title = { Text(text = "ERROR") },
+                    text = { Text("La base de datos está vacía o nula.") },
+                    confirmButton = {
+                        Button(onClick = onDismiss) {
+                            Text("OK")
                         }
-                    }) {
-                        Text("Sí")
                     }
-                },
-                dismissButton = {
-                    Button(onClick = onDismiss) {
-                        Text("No")
-                    }
+                )
+            } else {
+                val confirmationMessage = when (userSelection) {
+                    " BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
+                    " BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
+                    " DESCARGAR" -> "¿Descargar los últimos 30 días?"
+                    else -> ""
                 }
-            )
+
+                AlertDialog(
+                    onDismissRequest = onDismiss,
+                    title = { Text(text = "Confirmación") },
+                    text = { Text(confirmationMessage) },
+                    confirmButton = {
+                        Button(onClick = {
+                            onConfirm()
+                            val isSuccessfulDelet = glucoseService.isDeleteSuccess
+                            val isSuccessfulPrint = printService.isDownloadSuccess
+
+                            if (isSuccessfulDelet || isSuccessfulPrint) {
+                                onMeasurementsDeleted(true, "Proceso correcto.")
+                            } else {
+                                onMeasurementsDeleted(false, "ERROR al realizar el proceso.")
+                            }
+                        }) {
+                            Text("Sí")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = onDismiss) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
         }
     }
 }

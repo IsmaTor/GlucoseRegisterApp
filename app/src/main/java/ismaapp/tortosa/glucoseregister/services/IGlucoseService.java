@@ -11,7 +11,7 @@ public interface IGlucoseService {
     public void insertGlucoseMeasurement(int glucoseValue);
     //Delete all measurements from the database
     public void deleteAllGlucoseMeasurements();
-    public boolean isActionSuccess();
+    public boolean isDeleteSuccess();
 
     void deleteLastMeasure();
 

@@ -73,7 +73,7 @@ public class GlucoseServiceImp implements IGlucoseService {
     }
 
     @Override
-    public boolean isActionSuccess() {
+    public boolean isDeleteSuccess() {
         return actionSuccess;
     }
 
