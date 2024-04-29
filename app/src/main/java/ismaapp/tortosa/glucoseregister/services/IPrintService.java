@@ -1,5 +1,7 @@
 package ismaapp.tortosa.glucoseregister.services;
 
+import android.content.Context;
+
 import java.io.File;
 import java.util.List;
 

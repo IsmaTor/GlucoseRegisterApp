@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
                                 val intervalHours = navBackStackEntry.arguments?.getString("intervalHours")?.toInt() ?: 0
                                 Surface(
                                     color = Color.DarkGray
-                                    ) {
+                                ) {
                                     GraphicDetailScreen(glucoseService, intervalHours, onNavigateBack = {
                                         navController.popBackStack()
                                     })
@@ -130,3 +130,5 @@ class MainActivity : ComponentActivity() {
         databaseGlucose.close()
     }
 }
+
+

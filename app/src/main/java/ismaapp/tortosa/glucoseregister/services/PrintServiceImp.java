@@ -1,6 +1,8 @@
 package ismaapp.tortosa.glucoseregister.services;
 
+
 import android.os.Environment;
+
 import android.util.Log;
 
 import com.itextpdf.text.Document;
@@ -10,8 +12,10 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
@@ -34,40 +38,67 @@ public class PrintServiceImp implements IPrintService {
     public File generatePDF(List<GlucoseMeasurement> glucoseMeasurements) {
         List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
 
-        //Obtener las mediciones de glucosa.
+        // Obtener las mediciones de glucosa si la lista está vacía
         if (measurements.isEmpty()) {
             measurements = glucoseService.getAllGlucoseMeasurements();
         }
 
-        File downloadsDirectory = getDownloadsDirectory(); //Ruta del directorio de descargas.
+        // Crear un nombre de archivo único para el PDF
+        String pdfFileName = "glucose_records.pdf";
 
-        String pdfFilePath = downloadsDirectory.getPath() + "/glucose_records.pdf"; //Ruta de guardado.
-        File pdfFile = new File(pdfFilePath);
+        // Obtener el directorio de descargas usando Environment
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-        try (FileOutputStream outputStream = new FileOutputStream(pdfFile)) {
-            Document document = new Document(); //Creación del documento.
-            PdfWriter.getInstance(document, outputStream);
+        // Crear el archivo PDF en el directorio de descargas
+        File pdfFile = new File(downloadsDirectory, pdfFileName);
+
+        OutputStream outputStream = null;
+        try {
+            outputStream = Files.newOutputStream(pdfFile.toPath());
+
+            // Crear el documento PDF
+            Document document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+
+            // Encriptar el PDF con una contraseña
+            writer.setEncryption("11235DV".getBytes(), null,
+                    PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128 | PdfWriter.STANDARD_ENCRYPTION_128);
+
             document.open();
 
-            addContentToPDF(document, measurements); //Agragar contenido al documento.
+            // Agregar contenido al documento PDF
+            addContentToPDF(document, measurements);
 
             document.close();
 
-            // Verificar la existencia del archivo PDF después de cerrar el documento.
+            // Verificar la existencia y tamaño del archivo PDF
             if (pdfFile.exists() && pdfFile.length() > 0) {
                 downloadSuccess = true;
-                Log.d(CLASS_NAME, "PDF successfully created in: " + pdfFilePath);
+                Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
+                // No puedes mostrar un Toast directamente aquí sin el contexto,
+                // necesitarías manejar esto de manera diferente según tu caso de uso.
+                return pdfFile;
             } else {
                 downloadSuccess = false;
-                Log.e(CLASS_NAME, "ERROR: The PDF file was not generated correctly.");
+                Log.e(CLASS_NAME, "ERROR: El archivo PDF no se generó correctamente");
             }
 
-        } catch (DocumentException | IOException e) {
-            Log.e(CLASS_NAME, "Error generating PDF: " + e.getMessage(), e);
+        } catch (IOException | DocumentException e) {
+            Log.e(CLASS_NAME, "Error generando el PDF: " + e.getMessage(), e);
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close(); // Cerrar OutputStream en el bloque finally
+                } catch (IOException e) {
+                    Log.e(CLASS_NAME, "Error cerrando outputStream: " + e.getMessage(), e);
+                }
+            }
         }
 
-        return pdfFile;
+        return null;
     }
+
+
 
     //Creación de tabla para el documento pdf.
     private void addContentToPDF(Document document, List<GlucoseMeasurement> glucoseMeasurements) throws DocumentException {
@@ -89,17 +120,6 @@ public class PrintServiceImp implements IPrintService {
         }
 
         document.add(table); //Agregar tabla al documento.
-    }
-
-    private File getDownloadsDirectory() {
-        //Guardar el archivo en una carpeta predeterminada.
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
-        if (!downloadsDirectory.exists()) {
-            downloadsDirectory.mkdirs(); // Crear el directorio si no existe
-        }
-
-        return downloadsDirectory;
     }
 
 }
