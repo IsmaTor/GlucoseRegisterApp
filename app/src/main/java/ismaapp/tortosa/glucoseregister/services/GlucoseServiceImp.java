@@ -92,6 +92,7 @@ public class GlucoseServiceImp implements IGlucoseService {
         }
     }
 
+    @Override
     public void deleteLastMeasure() {
         try {
             Cursor cursor = executeQuery(QUERY_LAST_MEASURE);

@@ -24,6 +24,8 @@ import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import ismaapp.tortosa.glucoseregister.services.IPrintService
+import ismaapp.tortosa.glucoseregister.services.PrintServiceImp
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
     private lateinit var glucoseService: IGlucoseService
+    private lateinit var printService: IPrintService
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -44,10 +47,8 @@ class MainActivity : ComponentActivity() {
 
         databaseGlucose = GlucoseDBHelper(this).writableDatabase
         glucoseRepository = GlucoseRepository(databaseGlucose)
-        glucoseService =
-            GlucoseServiceImp(
-                glucoseRepository
-            )
+        glucoseService = GlucoseServiceImp(glucoseRepository)
+        printService = PrintServiceImp(glucoseService)
 
         setContent {
             MaterialTheme {
@@ -114,7 +115,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("options") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseOptionsScreen(glucoseService = glucoseService)
+                                    GlucoseOptionsScreen(glucoseService = glucoseService, printService = printService)
                                 }
                             }
                         }

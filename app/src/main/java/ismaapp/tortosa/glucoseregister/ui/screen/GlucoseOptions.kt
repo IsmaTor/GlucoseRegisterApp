@@ -38,11 +38,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.services.IPrintService
 import kotlinx.coroutines.delay
 
 @Composable
 fun GlucoseOptionsScreen(
     glucoseService: IGlucoseService,
+    printService: IPrintService
 ) {
     val deleteAll = " BORRAR REGISTROS"
     val deleteLast = " BORRAR ÚLTIMA"
@@ -157,7 +159,7 @@ fun GlucoseOptionsScreen(
                         glucoseService.deleteLastMeasure()
                     }
                     print -> {
-                            //implementar lógica para descarga
+                        printService.generatePDF(glucoseMeasurements)
                     }
                 }
                 showDialog = false
