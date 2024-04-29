@@ -12,6 +12,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 
@@ -31,7 +32,12 @@ public class PrintServiceImp implements IPrintService {
 
     @Override
     public File generatePDF(List<GlucoseMeasurement> glucoseMeasurements) {
-        glucoseMeasurements = glucoseService.getAllGlucoseMeasurements();
+        List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
+
+        //Obtener las mediciones de glucosa.
+        if (measurements.isEmpty()) {
+            measurements = glucoseService.getAllGlucoseMeasurements();
+        }
 
         File downloadsDirectory = getDownloadsDirectory(); //Ruta del directorio de descargas.
 
@@ -43,21 +49,21 @@ public class PrintServiceImp implements IPrintService {
             PdfWriter.getInstance(document, outputStream);
             document.open();
 
-            addContentToPDF(document, glucoseMeasurements); //Agragar contenido al documento.
+            addContentToPDF(document, measurements); //Agragar contenido al documento.
 
             document.close();
 
             // Verificar la existencia del archivo PDF después de cerrar el documento.
             if (pdfFile.exists() && pdfFile.length() > 0) {
                 downloadSuccess = true;
-                Log.d(CLASS_NAME, "PDF creado con éxito en: " + pdfFilePath);
+                Log.d(CLASS_NAME, "PDF successfully created in: " + pdfFilePath);
             } else {
                 downloadSuccess = false;
-                Log.e(CLASS_NAME, "ERROR: El archivo PDF no se ha generado correctamente.");
+                Log.e(CLASS_NAME, "ERROR: The PDF file was not generated correctly.");
             }
 
         } catch (DocumentException | IOException e) {
-            Log.e(CLASS_NAME, "Error generando PDF: " + e.getMessage(), e);
+            Log.e(CLASS_NAME, "Error generating PDF: " + e.getMessage(), e);
         }
 
         return pdfFile;
@@ -69,19 +75,17 @@ public class PrintServiceImp implements IPrintService {
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
 
-        PdfPTable table = new PdfPTable(3); // 3 columnas para fecha, valor de glucosa y nota
+        PdfPTable table = new PdfPTable(2); //2 columnas
         table.setWidthPercentage(100);
 
         //Encabezados de tabla.
-        table.addCell("ID");
-        table.addCell("Valor de Glucosa");
         table.addCell("Fecha");
+        table.addCell("Valor de Glucosa");
 
         //Rellenar la tabla con datos de las mediciones de glucosa.
         for (GlucoseMeasurement measurement : glucoseMeasurements) {
-            table.addCell(String.valueOf(measurement.getId())); // Agregar ID
-            table.addCell(String.valueOf(measurement.getGlucoseValue())); // Agregar valor de glucosa
             table.addCell(measurement.getDate()); // Agregar fecha
+            table.addCell(String.valueOf(measurement.getGlucoseValue())); // Agregar valor de glucosa
         }
 
         document.add(table); //Agregar tabla al documento.

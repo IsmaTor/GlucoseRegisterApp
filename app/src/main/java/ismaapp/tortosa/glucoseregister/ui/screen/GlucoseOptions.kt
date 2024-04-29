@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -88,38 +87,22 @@ fun GlucoseOptionsScreen(
         )
 
         //Botón para borrar todas las mediciones.
-        Button(
+        OptionButtons(
+            color = darkRed,
+            text = deleteAll,
             onClick = {
                 showDialog = true
                 userSelection = deleteAll
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = darkRed)
-        ) {
-            Icon(Icons.Filled.Delete, contentDescription = "deleteAll")
-            Text(deleteAll, color = Color.White)
-        }
+            } )
 
         //Botón para borrar última medición.
-        Button(
+        OptionButtons(
+            color = darkRed,
+            text = deleteLast,
             onClick = {
                 showDialog = true
                 userSelection = deleteLast
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = darkRed)
-        ) {
-            Icon(Icons.Filled.Delete, contentDescription = "deleteLast")
-            Text(deleteLast, color = Color.White)
-        }
+            } )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -131,20 +114,13 @@ fun GlucoseOptionsScreen(
         )
 
         //Botón para descargar las mediciones.
-        Button(
+        OptionButtons(
+            color = Color.DarkGray,
+            text = print,
             onClick = {
                 showDialog = true
                 userSelection = print
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp)
-                .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
-        ) {
-            Icon(Icons.Filled.ArrowDropDown, contentDescription = "print")
-            Text(print, color = Color.White)
-        }
+            } )
 
         val dialogOptionsParams = DialogOptionsParams(
             glucoseService = glucoseService,
@@ -179,6 +155,26 @@ fun GlucoseOptionsScreen(
 
         SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
 
+    }
+}
+
+@Composable
+fun OptionButtons(
+    color: Color,
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .heightIn(min = 24.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(color = color)
+    ) {
+        Icon(Icons.Filled.Delete, contentDescription = text)
+        Text(text, color = Color.White)
     }
 }
 
@@ -269,4 +265,3 @@ fun ConfirmDeleteDialogOptions(
         }
     }
 }
-
