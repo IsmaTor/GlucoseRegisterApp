@@ -84,7 +84,7 @@ fun GlucoseOptionsScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        //Botón para borrar.
+        //Botón para borrar todas las mediciones.
         Button(
             onClick = {
                 showDialog = true
@@ -127,7 +127,7 @@ fun GlucoseOptionsScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        //Botón para mostrar opciones de imprimir.
+        //Botón para descargar las mediciones.
         Button(
             onClick = {
                 showDialog = true
@@ -157,12 +157,12 @@ fun GlucoseOptionsScreen(
                         glucoseService.deleteLastMeasure()
                     }
                     print -> {
-                            //implementar lógica para imprimir
+                            //implementar lógica para descarga
                     }
                 }
                 showDialog = false
             },
-            userSelection = userSelection, // Selección de ejemplo del usuario
+            userSelection = userSelection,
             isDatabaseEmptyOrNull = glucoseService::isDatabaseEmptyOrNull,
             onMeasurementsDeleted = { isSuccess, newMessage ->
                 isMeasurementSuccessful = isSuccess
@@ -171,31 +171,40 @@ fun GlucoseOptionsScreen(
             }
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            if (showMessage) {
-                //Muestra el mensaje.
-                val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
-                val color = if (isMeasurementSuccessful) Color.Green else Color.Red
+        SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
 
-                Row(
-                    modifier = Modifier
-                        .background(color)
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .zIndex(1f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(message, color = Color.White)
-                }
+    }
+}
+
+@Composable
+fun SuccessfulMessage(
+    showMessage: Boolean,
+    isMeasurementSuccessful: Boolean,
+    message: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        if (showMessage) {
+            //Muestra el mensaje.
+            val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
+            val color = if (isMeasurementSuccessful) Color.Green else Color.Red
+
+            Row(
+                modifier = Modifier
+                    .background(color)
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .zIndex(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(message, color = Color.White)
             }
         }
-
     }
 }
 
