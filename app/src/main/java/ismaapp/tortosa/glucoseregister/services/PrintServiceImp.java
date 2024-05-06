@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -15,6 +14,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,7 +47,7 @@ public class PrintServiceImp implements IPrintService {
         // Crear un nombre de archivo único para el PDF
         String pdfFileName = "glucose_records.pdf";
 
-        // Obtener el directorio de descargas usando MediaStore
+        // Obtener el directorio de descargas usando Environment.getExternalStoragePublicDirectory
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         // Crear un ContentValues para el nuevo archivo en MediaStore
@@ -60,45 +60,46 @@ public class PrintServiceImp implements IPrintService {
         Uri outputFileUri = resolver.insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), contentValues);
 
         if (outputFileUri != null) {
+            OutputStream outputStream = null;
             try {
-                OutputStream outputStream = resolver.openOutputStream(outputFileUri);
-                if (outputStream != null) {
-                    // Crear el documento PDF
-                    Document document = new Document();
-                    PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+                outputStream = resolver.openOutputStream(outputFileUri);
 
-                    // Encriptar el PDF con una contraseña
-                    writer.setEncryption("11235DV".getBytes(), null,
-                            PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128 | PdfWriter.STANDARD_ENCRYPTION_128);
+                // Crear el documento PDF
+                Document document = new Document();
 
-                    document.open();
+                PdfWriter.getInstance(document, outputStream);
 
-                    // Agregar contenido al documento PDF
-                    addContentToPDF(document, measurements);
+                document.open();
 
-                    document.close();
-                    outputStream.close();
+                // Agregar contenido al documento PDF
+                addContentToPDF(document, measurements);
 
-                    // Verificar la existencia y tamaño del archivo PDF
-                    File pdfFile = new File(downloadsDirectory, pdfFileName);
-                    if (pdfFile.exists() && pdfFile.length() > 0) {
-                        downloadSuccess = true;
-                        Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
-                        Toast.makeText(context, "PDF generado exitosamente", Toast.LENGTH_SHORT).show();
-                        return pdfFile;
-                    } else {
-                        downloadSuccess = false;
-                        Log.e(CLASS_NAME, "ERROR: El archivo PDF no se generó correctamente");
-                        Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
-                    }
+                document.close();
+
+                // Verificar la existencia y tamaño del archivo PDF
+                File pdfFile = new File(downloadsDirectory, pdfFileName);
+                if (pdfFile.exists() && pdfFile.length() > 0) {
+                    downloadSuccess = true;
+                    Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
+                    return pdfFile;
+                } else {
+                    downloadSuccess = false;
+                    Log.e(CLASS_NAME, "ERROR: El archivo PDF no se generó correctamente");
                 }
             } catch (IOException | DocumentException e) {
                 Log.e(CLASS_NAME, "Error generando el PDF: " + e.getMessage(), e);
-                Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_SHORT).show();
+            } finally {
+                // Cerrar outputStream en el bloque finally para garantizar la liberación de recursos
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException e) {
+                        Log.e(CLASS_NAME, "Error al cerrar outputStream: " + e.getMessage(), e);
+                    }
+                }
             }
         } else {
             Log.e(CLASS_NAME, "ERROR: No se pudo crear el archivo en MediaStore");
-            Toast.makeText(context, "Error al crear el archivo en MediaStore", Toast.LENGTH_SHORT).show();
         }
 
         return null;
