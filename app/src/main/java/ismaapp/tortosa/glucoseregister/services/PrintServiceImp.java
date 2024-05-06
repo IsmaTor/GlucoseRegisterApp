@@ -7,14 +7,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,18 +37,16 @@ public class PrintServiceImp implements IPrintService {
     public File generatePDF(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
         List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
 
-        // Obtener las mediciones de glucosa si la lista está vacía
+        //Obtiene las mediciones de glucosa si la lista está vacía
         if (measurements.isEmpty()) {
             measurements = glucoseService.getAllGlucoseMeasurements();
         }
 
-        // Crear un nombre de archivo único para el PDF
-        String pdfFileName = "glucose_records.pdf";
+        String pdfFileName = "glucose_records.pdf"; //Nombre del archivo pdf
 
-        // Obtener el directorio de descargas usando Environment.getExternalStoragePublicDirectory
+        //Obtener el archivo de descargas.
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-        // Crear un ContentValues para el nuevo archivo en MediaStore
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, pdfFileName);
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
@@ -64,47 +60,42 @@ public class PrintServiceImp implements IPrintService {
             try {
                 outputStream = resolver.openOutputStream(outputFileUri);
 
-                // Crear el documento PDF
-                Document document = new Document();
+                Document document = new Document(); //Crear el documento.
 
-                PdfWriter.getInstance(document, outputStream);
+                PdfWriter.getInstance(document, outputStream); //Escribir el documento.
 
                 document.open();
 
-                // Agregar contenido al documento PDF
-                addContentToPDF(document, measurements);
+                addContentToPDF(document, measurements); //Agregar el contenido al documento.
 
                 document.close();
 
-                // Verificar la existencia y tamaño del archivo PDF
+                //Verificar la existencia del archivo pdf.
                 File pdfFile = new File(downloadsDirectory, pdfFileName);
                 if (pdfFile.exists() && pdfFile.length() > 0) {
                     downloadSuccess = true;
-                    Log.d(CLASS_NAME, "PDF creado exitosamente en: " + pdfFile.getAbsolutePath());
+                    Log.d(CLASS_NAME, "PDF successfully created in: " + pdfFile.getAbsolutePath());
                     return pdfFile;
                 } else {
                     downloadSuccess = false;
-                    Log.e(CLASS_NAME, "ERROR: El archivo PDF no se generó correctamente");
+                    Log.e(CLASS_NAME, "ERROR: The PDF file was not generated correctly.");
                 }
             } catch (IOException | DocumentException e) {
-                Log.e(CLASS_NAME, "Error generando el PDF: " + e.getMessage(), e);
-            } finally {
-                // Cerrar outputStream en el bloque finally para garantizar la liberación de recursos
+                Log.e(CLASS_NAME, "Error generating the PDF: " + e.getMessage(), e);
+            } finally { //Garantiza la liberación de recursos.
                 if (outputStream != null) {
                     try {
                         outputStream.close();
                     } catch (IOException e) {
-                        Log.e(CLASS_NAME, "Error al cerrar outputStream: " + e.getMessage(), e);
+                        Log.e(CLASS_NAME, "Error closing outputStream: " + e.getMessage(), e);
                     }
                 }
             }
         } else {
-            Log.e(CLASS_NAME, "ERROR: No se pudo crear el archivo en MediaStore");
+            Log.e(CLASS_NAME, "ERROR: Could not create file in MediaStore.");
         }
-
         return null;
     }
-
 
     //Creación de tabla para el documento pdf.
     private void addContentToPDF(Document document, List<GlucoseMeasurement> glucoseMeasurements) throws DocumentException {
@@ -124,7 +115,6 @@ public class PrintServiceImp implements IPrintService {
             table.addCell(measurement.getDate()); // Agregar fecha
             table.addCell(String.valueOf(measurement.getGlucoseValue())); // Agregar valor de glucosa
         }
-
         document.add(table); //Agregar tabla al documento.
     }
 

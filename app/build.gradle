@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "ismaapp.tortosa.glucoseregister"
-        minSdk 26
+        minSdk 29
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -61,8 +61,6 @@ dependencies {
     implementation 'androidx.compose.material3:material3:1.2.1'
     implementation "androidx.navigation:navigation-compose:2.8.0-alpha07"
     implementation 'com.itextpdf:itextg:5.5.10'
-    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-
 
     //testing
     testImplementation 'junit:junit:4.13.2'
