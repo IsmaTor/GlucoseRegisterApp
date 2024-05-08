@@ -34,12 +34,77 @@ public class PrintServiceImp implements IPrintService {
         return downloadSuccess;
     }
 
+    @Override
     public File generatePDF(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
         List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
 
         //Obtiene las mediciones de glucosa si la lista está vacía
         if (measurements.isEmpty()) {
             measurements = glucoseService.getAllGlucoseMeasurements();
+        }
+
+        String pdfFileName = "glucose_records.pdf"; //Nombre del archivo pdf
+
+        //Obtener el archivo de descargas.
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, pdfFileName);
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
+        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        ContentResolver resolver = context.getContentResolver();
+        Uri outputFileUri = resolver.insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), contentValues);
+
+        if (outputFileUri != null) {
+            OutputStream outputStream = null;
+            try {
+                outputStream = resolver.openOutputStream(outputFileUri);
+
+                Document document = new Document(); //Crear el documento.
+
+                PdfWriter.getInstance(document, outputStream); //Escribir el documento.
+
+                document.open();
+
+                addContentToPDF(document, measurements); //Agregar el contenido al documento.
+
+                document.close();
+
+                //Verificar la existencia del archivo pdf.
+                File pdfFile = new File(downloadsDirectory, pdfFileName);
+                if (pdfFile.exists() && pdfFile.length() > 0) {
+                    downloadSuccess = true;
+                    Log.d(CLASS_NAME, "PDF successfully created in: " + pdfFile.getAbsolutePath());
+                    return pdfFile;
+                } else {
+                    downloadSuccess = false;
+                    Log.e(CLASS_NAME, "ERROR: The PDF file was not generated correctly.");
+                }
+            } catch (IOException | DocumentException e) {
+                Log.e(CLASS_NAME, "Error generating the PDF: " + e.getMessage(), e);
+            } finally { //Garantiza la liberación de recursos.
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException e) {
+                        Log.e(CLASS_NAME, "Error closing outputStream: " + e.getMessage(), e);
+                    }
+                }
+            }
+        } else {
+            Log.e(CLASS_NAME, "ERROR: Could not create file in MediaStore.");
+        }
+        return null;
+    }
+
+    @Override
+    public File generatePDF30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
+        List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
+
+        //Obtiene las mediciones de glucosa si la lista está vacía
+        if (measurements.isEmpty()) {
+            measurements = glucoseService.getLast30GlucoseMeasurement();
         }
 
         String pdfFileName = "glucose_records.pdf"; //Nombre del archivo pdf

@@ -26,6 +26,12 @@ public class GlucoseServiceImp implements IGlucoseService {
             " FROM " + GlucoseDBHelper.TABLE_NAME +
             ORDER_BY + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
             GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 1";
+
+    private static final String QUERY_LAST_30_VALUES = "SELECT " + GlucoseDBHelper.COLUMN_GLUCOSE_VALUE +
+            " FROM " + GlucoseDBHelper.TABLE_NAME +
+            " ORDER BY " + GlucoseDBHelper.COLUMN_DATE + " DESC, " +
+            GlucoseDBHelper.COLUMN_ID + " DESC LIMIT 10";
+
     private boolean actionSuccess = false;
 
     public GlucoseServiceImp(GlucoseRepository glucoseRepository) {
@@ -143,6 +149,32 @@ public class GlucoseServiceImp implements IGlucoseService {
         }
         return lastGlucoseMeasurement;
     }
+
+    @Override
+    public List<GlucoseMeasurement> getLast30GlucoseMeasurement() {
+        List<GlucoseMeasurement> last30GlucoseMeasurements = new ArrayList<>();
+        try {
+            Cursor cursor = executeQuery(QUERY_LAST_30_VALUES);
+            if (cursor != null && cursor.moveToFirst()) {
+                int glucoseValueIndex = cursor.getColumnIndex(GlucoseDBHelper.COLUMN_GLUCOSE_VALUE);
+
+                while (!cursor.isAfterLast()) {
+                    if (glucoseValueIndex != -1) {
+                        int glucoseValue = cursor.getInt(glucoseValueIndex);
+                        // Construir un objeto GlucoseMeasurement y agregarlo a la lista
+                        GlucoseMeasurement measurement = new GlucoseMeasurement(0,glucoseValue, "");
+                        last30GlucoseMeasurements.add(measurement);
+                    }
+                    cursor.moveToNext();
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            logError("Error retrieving last 30 glucose measurements: " + e.getMessage(), e);
+        }
+        return last30GlucoseMeasurements;
+    }
+
 
     @Override
     public boolean isDatabaseEmptyOrNull() {

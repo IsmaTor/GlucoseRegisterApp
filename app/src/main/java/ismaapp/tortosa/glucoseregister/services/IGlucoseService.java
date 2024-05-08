@@ -16,6 +16,9 @@ public interface IGlucoseService {
     void deleteLastMeasure();
 
     public int getLastGlucoseMeasurement();
+
+    List<GlucoseMeasurement> getLast30GlucoseMeasurement();
+
     boolean isDatabaseEmptyOrNull();
     List<GlucoseMeasurement> getAllGlucoseMeasurements();
 }
