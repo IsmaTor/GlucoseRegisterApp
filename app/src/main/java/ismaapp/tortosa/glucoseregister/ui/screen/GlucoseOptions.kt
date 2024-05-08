@@ -1,6 +1,9 @@
 package ismaapp.tortosa.glucoseregister.ui.screen
 
+import android.Manifest
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
@@ -66,6 +72,32 @@ fun GlucoseOptionsScreen(
         if (showMessage) {
             delay(5000) // 5 segundos.
             showMessage = false // false para que desaparezca.
+        }
+    }
+
+    // Función para realizar la descarga después de verificar permisos
+    fun performDownload(printService: IPrintService, context: Context) {
+        // Realizar la descarga (generar PDF)
+        printService.generatePDF(context, glucoseMeasurements)
+
+        // Configurar el mensaje de éxito
+        showMessage = true
+        isMeasurementSuccessful = printService.isDownloadSuccess
+        message = if (isMeasurementSuccessful) "Descarga exitosa" else "Error en la descarga"
+    }
+
+    // RequestPermissionLauncher para solicitar WRITE_EXTERNAL_STORAGE
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isPermissionGranted ->
+        if (isPermissionGranted) {
+            // Permiso concedido, proceder con la descarga
+            performDownload(printService, context)
+        } else {
+            // Permiso denegado, mostrar mensaje de error o realizar alguna acción
+            showMessage = true
+            isMeasurementSuccessful = false
+            message = "Permiso denegado, acepte el permiso de almacenamiento."
         }
     }
 
@@ -139,6 +171,18 @@ fun GlucoseOptionsScreen(
                         glucoseService.deleteLastMeasure()
                     }
                     print -> {
+                        // Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) {
+                            // Permiso concedido, proceder con la descarga
+                            performDownload(printService, context)
+                        } else {
+                            // Permiso no concedido, solicitar permiso al usuario
+                            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
                         printService.generatePDF(context, glucoseMeasurements)
                     }
                 }
@@ -159,6 +203,8 @@ fun GlucoseOptionsScreen(
 
     }
 }
+
+
 
 @Composable
 fun OptionButtons(
