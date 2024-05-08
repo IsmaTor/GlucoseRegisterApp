@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
@@ -79,11 +77,6 @@ fun GlucoseOptionsScreen(
     fun performDownload(printService: IPrintService, context: Context) {
         // Realizar la descarga (generar PDF)
         printService.generatePDF(context, glucoseMeasurements)
-
-        // Configurar el mensaje de éxito
-        showMessage = true
-        isMeasurementSuccessful = printService.isDownloadSuccess
-        message = if (isMeasurementSuccessful) "Descarga exitosa" else "Error en la descarga"
     }
 
     // RequestPermissionLauncher para solicitar WRITE_EXTERNAL_STORAGE
@@ -183,7 +176,6 @@ fun GlucoseOptionsScreen(
                             // Permiso no concedido, solicitar permiso al usuario
                             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         }
-                        printService.generatePDF(context, glucoseMeasurements)
                     }
                 }
                 showDialog = false
@@ -203,8 +195,6 @@ fun GlucoseOptionsScreen(
 
     }
 }
-
-
 
 @Composable
 fun OptionButtons(
