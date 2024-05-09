@@ -98,22 +98,29 @@ public class PrintServiceImp implements IPrintService {
         return null;
     }
 
+    //Archivo que muestra las últimas 30 mediciones.
     @Override
-    public File generatePDF30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
+    public File pdf30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements) {
         List<GlucoseMeasurement> measurements = new ArrayList<>(glucoseMeasurements);
 
-        //Obtiene las mediciones de glucosa si la lista está vacía
+        // Obtiene las mediciones de glucosa si la lista está vacía
         if (measurements.isEmpty()) {
             measurements = glucoseService.getLast30GlucoseMeasurement();
         }
 
-        String pdfFileName = "glucose_records.pdf"; //Nombre del archivo pdf
+        String pdfFileName = "glucose_last30.pdf";
+
+        return generatePDFGlobal(context, measurements, pdfFileName);
+    }
+
+    //Creación del archivo pdf.
+    public File generatePDFGlobal(Context context, List<GlucoseMeasurement> glucoseMeasurements, String fileName) {
 
         //Obtener el archivo de descargas.
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, pdfFileName);
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
         contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
@@ -131,12 +138,12 @@ public class PrintServiceImp implements IPrintService {
 
                 document.open();
 
-                addContentToPDF(document, measurements); //Agregar el contenido al documento.
+                addContentToPDF(document, glucoseMeasurements); //Agregar el contenido al documento.
 
                 document.close();
 
                 //Verificar la existencia del archivo pdf.
-                File pdfFile = new File(downloadsDirectory, pdfFileName);
+                File pdfFile = new File(downloadsDirectory, fileName);
                 if (pdfFile.exists() && pdfFile.length() > 0) {
                     downloadSuccess = true;
                     Log.d(CLASS_NAME, "PDF successfully created in: " + pdfFile.getAbsolutePath());

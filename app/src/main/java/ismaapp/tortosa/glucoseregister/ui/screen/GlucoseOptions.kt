@@ -77,7 +77,7 @@ fun GlucoseOptionsScreen(
     fun performDownload(printService: IPrintService, context: Context) {
         // Realizar la descarga (generar PDF)
         //printService.generatePDF(context, glucoseMeasurements)
-        printService.generatePDF30Values(context, glucoseMeasurements)
+        printService.pdf30Values(context, glucoseMeasurements)
     }
 
     // RequestPermissionLauncher para solicitar WRITE_EXTERNAL_STORAGE

@@ -12,5 +12,5 @@ public interface IPrintService {
 
     File generatePDF(Context context, List<GlucoseMeasurement> glucoseMeasurements);
 
-    File generatePDF30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements);
+    File pdf30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements);
 }
