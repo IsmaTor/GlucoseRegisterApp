@@ -12,11 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -32,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +41,7 @@ import androidx.core.content.ContextCompat
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
+import ismaapp.tortosa.glucoseregister.utils.OptionButtons
 import ismaapp.tortosa.glucoseregister.utils.params.DialogOptionsParams
 import kotlinx.coroutines.delay
 
@@ -55,12 +54,12 @@ fun GlucoseOptionsScreen(
     val deleteAll = " BORRAR REGISTROS"
     val deleteLast = " BORRAR ÚLTIMA"
     val print = " DESCARGAR"
+    val print30 = " DESCARGAR30"
     val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
 
     var showMessage by remember { mutableStateOf(false) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
-
     var glucoseMeasurements by remember { mutableStateOf<List<GlucoseMeasurement>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
     var userSelection by remember { mutableStateOf(deleteAll) }
@@ -73,10 +72,13 @@ fun GlucoseOptionsScreen(
         }
     }
 
-    // Función para realizar la descarga después de verificar permisos
+    // Función para realizar la descarga después de verificar permisos.
     fun performDownload(printService: IPrintService, context: Context) {
-        // Realizar la descarga (generar PDF)
-        //printService.generatePDF(context, glucoseMeasurements)
+        printService.pdfAllValues(context, glucoseMeasurements)
+    }
+
+    //Función para realizar la descarga de las ultimas 30 mediciones después de verificar permisos.
+    fun performDownload30(printService: IPrintService, context: Context) {
         printService.pdf30Values(context, glucoseMeasurements)
     }
 
@@ -118,6 +120,7 @@ fun GlucoseOptionsScreen(
         OptionButtons(
             color = darkRed,
             text = deleteAll,
+            icon = Icons.Filled.Delete,
             onClick = {
                 showDialog = true
                 userSelection = deleteAll
@@ -127,6 +130,7 @@ fun GlucoseOptionsScreen(
         OptionButtons(
             color = darkRed,
             text = deleteLast,
+            icon = Icons.Filled.Delete,
             onClick = {
                 showDialog = true
                 userSelection = deleteLast
@@ -145,10 +149,21 @@ fun GlucoseOptionsScreen(
         OptionButtons(
             color = Color.DarkGray,
             text = print,
+            icon = Icons.Filled.ArrowDropDown,
             onClick = {
                 showDialog = true
                 userSelection = print
             } )
+
+        //Botón para descargar las últimas 30 mediciones.
+        OptionButtons(
+            color = Color.DarkGray,
+            text = print30,
+            icon = Icons.Filled.ArrowDropDown,
+            onClick =  {
+                showDialog = true
+                userSelection = print30
+        } )
 
         val dialogOptionsParams = DialogOptionsParams(
             glucoseService = glucoseService,
@@ -178,6 +193,20 @@ fun GlucoseOptionsScreen(
                             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         }
                     }
+                    print30 -> {
+                        // Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) {
+                            // Permiso concedido, proceder con la descarga
+                            performDownload30(printService, context)
+                        } else {
+                            // Permiso no concedido, solicitar permiso al usuario
+                            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
+                    }
                 }
                 showDialog = false
             },
@@ -194,26 +223,6 @@ fun GlucoseOptionsScreen(
 
         SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
 
-    }
-}
-
-@Composable
-fun OptionButtons(
-    color: Color,
-    text: String,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
-            .heightIn(min = 24.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(color = color)
-    ) {
-        Icon(Icons.Filled.Delete, contentDescription = text)
-        Text(text, color = Color.White)
     }
 }
 
@@ -271,7 +280,8 @@ fun ConfirmDeleteDialogOptions(
                 val confirmationMessage = when (userSelection) {
                     " BORRAR REGISTROS" -> "¿Estás seguro de que quieres borrar todas las mediciones?"
                     " BORRAR ÚLTIMA" -> "¿Estás seguro de que quieres borrar la última medición registrada?"
-                    " DESCARGAR" -> "¿Descargar los últimos 30 días?"
+                    " DESCARGAR" -> "¿Descargar todas las mediciones?"
+                    " DESCARGAR30" -> "¿Descargar las últimas 30 mediciones?"
                     else -> ""
                 }
 

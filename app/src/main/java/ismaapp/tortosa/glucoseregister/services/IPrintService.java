@@ -10,7 +10,7 @@ import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 public interface IPrintService {
     boolean isDownloadSuccess();
 
-    File generatePDF(Context context, List<GlucoseMeasurement> glucoseMeasurements);
+    File pdfAllValues(Context context, List<GlucoseMeasurement> glucoseMeasurements);
 
     File pdf30Values(Context context, List<GlucoseMeasurement> glucoseMeasurements);
 }
