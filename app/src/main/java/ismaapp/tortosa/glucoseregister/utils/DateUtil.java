@@ -1,11 +1,7 @@
 package ismaapp.tortosa.glucoseregister.utils;
 
-import android.os.Build;
-
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Locale;
 
 public class DateUtil {
@@ -16,16 +12,6 @@ public class DateUtil {
         // No-op: This class will not be instantiated to ensure consistency of results.
     }
 
-    public static Date getCurrentDate() {
-        return new Date();
-    }
-
-    private static String getFormattedDateNowLegacy() {
-        Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
-        return dateFormat.format(date);
-    }
-
     private static String getFormattedDateNow() {
         LocalDateTime localDate = LocalDateTime.now();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.getDefault());
@@ -33,10 +19,6 @@ public class DateUtil {
     }
 
     public static String getFormattedDate() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return getFormattedDateNow();
-        } else {
-            return getFormattedDateNowLegacy();
-        }
     }
 }

@@ -11,8 +11,14 @@ public interface IGlucoseService {
     public void insertGlucoseMeasurement(int glucoseValue);
     //Delete all measurements from the database
     public void deleteAllGlucoseMeasurements();
-    public boolean isInsertSuccess();
+    public boolean isDeleteSuccess();
+
+    void deleteLastMeasure();
+
     public int getLastGlucoseMeasurement();
+
+    List<GlucoseMeasurement> getLast30GlucoseMeasurement();
+
     boolean isDatabaseEmptyOrNull();
     List<GlucoseMeasurement> getAllGlucoseMeasurements();
 }

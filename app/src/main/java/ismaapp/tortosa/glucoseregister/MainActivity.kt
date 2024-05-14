@@ -1,7 +1,9 @@
 package ismaapp.tortosa.glucoseregister
 
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -24,6 +26,10 @@ import ismaapp.tortosa.glucoseregister.ui.screen.LoadingScreen
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import ismaapp.tortosa.glucoseregister.services.IPrintService
+import ismaapp.tortosa.glucoseregister.services.PrintServiceImp
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
@@ -33,6 +39,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var databaseGlucose: SQLiteDatabase
     private lateinit var glucoseRepository: GlucoseRepository
     private lateinit var glucoseService: IGlucoseService
+    private lateinit var printService: IPrintService
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -44,15 +51,14 @@ class MainActivity : ComponentActivity() {
 
         databaseGlucose = GlucoseDBHelper(this).writableDatabase
         glucoseRepository = GlucoseRepository(databaseGlucose)
-        glucoseService =
-            GlucoseServiceImp(
-                glucoseRepository
-            )
+        glucoseService = GlucoseServiceImp(glucoseRepository)
+        printService = PrintServiceImp(glucoseService)
 
         setContent {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
+
                         Image(
                             painter = painterResource(id = R.drawable.wallpaper),
                             contentDescription = null,
@@ -61,6 +67,11 @@ class MainActivity : ComponentActivity() {
                         )
 
                         val navController = rememberNavController()
+
+                        // Solicitar permisos de descarga si no están concedidos
+                        if (!isDownloadPermissionGranted()) {
+                            requestDownloadPermission()
+                        }
 
                         NavHost(
                             navController = navController,
@@ -114,7 +125,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("options") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseOptionsScreen(glucoseService = glucoseService)
+                                    GlucoseOptionsScreen(glucoseService = glucoseService, printService = printService, context = applicationContext)
                                 }
                             }
                         }
@@ -128,4 +139,24 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         databaseGlucose.close()
     }
+
+    private fun isDownloadPermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestDownloadPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            REQUEST_DOWNLOAD_PERMISSION_CODE
+        )
+    }
+
+    companion object {
+        private const val REQUEST_DOWNLOAD_PERMISSION_CODE = 100
+    }
+
 }

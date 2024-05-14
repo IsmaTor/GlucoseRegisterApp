@@ -159,7 +159,7 @@ fun ButtonsHome(
                 // Insertar medición en la base de datos
                 glucoseService.insertGlucoseMeasurement(glucoseValue)
 
-                val isInsertSuccessful = glucoseService.isInsertSuccess
+                val isInsertSuccessful = glucoseService.isDeleteSuccess
 
                 if (isInsertSuccessful) {
                     onMeasurementRegistered(true, "Medición registrada correctamente", 0)
