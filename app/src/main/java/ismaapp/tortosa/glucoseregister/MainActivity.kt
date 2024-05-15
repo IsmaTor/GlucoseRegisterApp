@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.Manifest
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -28,9 +29,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
+import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
+import ismaapp.tortosa.glucoseregister.services.IGlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.IPrintService
 import ismaapp.tortosa.glucoseregister.services.PrintServiceImp
-import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseConfiguration
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseConfigurationScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
@@ -42,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var glucoseRepository: GlucoseRepository
     private lateinit var glucoseService: IGlucoseService
     private lateinit var printService: IPrintService
+    private lateinit var glucoseLevels: IGlucoseLevels
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -55,6 +59,23 @@ class MainActivity : ComponentActivity() {
         glucoseRepository = GlucoseRepository(databaseGlucose)
         glucoseService = GlucoseServiceImp(glucoseRepository)
         printService = PrintServiceImp(glucoseService)
+        glucoseLevels = GlucoseLevelsImp(glucoseRepository)
+
+        val dbHelper = GlucoseDBHelper(this)
+        dbHelper.createTablesIfNotExists(databaseGlucose)
+
+        // Verificar que la tabla 'levels' se ha creado correctamente
+        if (isTableExists(databaseGlucose, GlucoseDBHelper.LEVELS_TABLE_NAME)) {
+            Log.d("MainActivity", "La tabla 'levels' existe.")
+        } else {
+            Log.e("MainActivity", "La tabla 'levels' no existe.")
+        }
+
+        // Insertar valores iniciales solo si no existen
+        if (glucoseLevels.levels == null) {
+            val initialLevels = GlucoseLevels(130, 80)
+            glucoseRepository.insertInitialLevels(initialLevels)
+        }
 
         setContent {
             MaterialTheme {
@@ -132,7 +153,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("configuration") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseConfigurationScreen()
+                                    GlucoseConfigurationScreen(glucoseLevels = glucoseLevels, glucoseRepository = glucoseRepository)
                                 }
                             }
                         }
@@ -164,6 +185,13 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val REQUEST_DOWNLOAD_PERMISSION_CODE = 100
+    }
+
+    private fun isTableExists(db: SQLiteDatabase, tableName: String): Boolean {
+        val cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name=?", arrayOf(tableName))
+        val exists = cursor.count > 0
+        cursor.close()
+        return exists
     }
 
 }

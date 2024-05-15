@@ -21,23 +21,32 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
+import ismaapp.tortosa.glucoseregister.services.IGlucoseLevels
 
 @Composable
-fun GlucoseConfigurationScreen() {
-    var glucoseLevels by remember { mutableStateOf(GlucoseLevels()) }
+fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository: GlucoseRepository) {
+    var glucoseLevelsUpdate by remember { mutableStateOf(glucoseLevels.levels ?: GlucoseLevels(130, 80)) }
 
     // Log para verificar los valores iniciales de glucoseLevels
-    Log.d("GlucoseConfigurationScreen", "GlucoseLevels inicial: $glucoseLevels")
+    Log.d("GlucoseConfigurationScreen", "GlucoseLevels inicial: $glucoseLevelsUpdate")
 
-    GlucoseConfiguration(glucoseLevels) { updatedLevels ->
+    GlucoseConfiguration(glucoseLevelsUpdate) { updatedLevels ->
         // Actualiza los niveles de glucosa con los nuevos valores
-        glucoseLevels = updatedLevels
+        glucoseLevelsUpdate = updatedLevels
 
-    // Log para verificar los niveles de glucosa actualizados
-    Log.d("GlucoseConfigurationScreen", "GlucoseLevels actualizados: $updatedLevels")
+        // Actualiza los valores en la base de datos
+        glucoseRepository.updateLevels(glucoseLevelsUpdate)
+
+        // Log para verificar los niveles de glucosa actualizados
+        Log.d("GlucoseConfigurationScreen", "GlucoseLevels actualizados: $updatedLevels")
+    }
+    // Obtener y mostrar todos los registros de la tabla de glucosa
+    val allGlucoseLevels = glucoseLevels.allGlucoseLevels
+    for (levels in allGlucoseLevels) {
+        Log.d("GlucoseConfigurationScreen", "ID: ${levels.getId()}, Max: ${levels.getLevelMax()}, Min: ${levels.getLevelMin()}")
     }
 }
-
 
 @Composable
 fun GlucoseConfiguration(
@@ -108,4 +117,5 @@ fun GlucoseConfiguration(
         }
     }
 }
+
 
