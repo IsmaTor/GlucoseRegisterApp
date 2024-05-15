@@ -1,6 +1,7 @@
 package ismaapp.tortosa.glucoseregister.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,8 +22,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -48,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.ui.theme.Purple40
 import kotlinx.coroutines.delay
 
 @Composable
@@ -72,6 +78,28 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: Nav
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.End, //Alinea los elementos al final derecha.
+        verticalAlignment = Alignment.Top //Alinea los elementos en la parte superior derecha.
+    ) {
+        IconButton(
+            onClick = {
+                navController.navigate("configuration") {
+                    launchSingleTop = true
+                }
+            },
+            modifier = Modifier.shadow(4.dp) //Agrega sombra al icono.
+        ) {
+            Icon(Icons.Default.Settings,
+                contentDescription = "Configuración",
+                modifier = Modifier.size(60.dp),
+                tint = Purple40)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -218,7 +246,7 @@ fun ButtonsHome(
 }
 
 @Composable
-private fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
+fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
     val scale = 1.15f // Porcentaje de escala en este es un 15% más grande de 1.0
 
     var isError by remember { mutableStateOf(false) }

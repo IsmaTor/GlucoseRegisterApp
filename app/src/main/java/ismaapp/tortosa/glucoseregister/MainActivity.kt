@@ -30,6 +30,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import ismaapp.tortosa.glucoseregister.services.IPrintService
 import ismaapp.tortosa.glucoseregister.services.PrintServiceImp
+import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseConfiguration
+import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseConfigurationScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseOptionsScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GraphicDetailScreen
 import ismaapp.tortosa.glucoseregister.ui.screen.GlucoseTimeRangeScreen
@@ -126,6 +128,11 @@ class MainActivity : ComponentActivity() {
                             composable("options") {
                                 Surface(color = Color.DarkGray) {
                                     GlucoseOptionsScreen(glucoseService = glucoseService, printService = printService, context = applicationContext)
+                                }
+                            }
+                            composable("configuration") {
+                                Surface(color = Color.DarkGray) {
+                                    GlucoseConfigurationScreen()
                                 }
                             }
                         }
