@@ -52,12 +52,13 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.ui.theme.Purple40
 import kotlinx.coroutines.delay
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: NavController) {
+fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels, navController: NavController) {
     var glucoseValue by remember { mutableIntStateOf(0) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
@@ -156,7 +157,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, navController: Nav
                 }
             }
             // Muestra la última medición
-            LastMeasure(lastMeasurement = lastMeasurement)
+            LastMeasure(lastMeasurement = lastMeasurement, glucoseLevels = glucoseLevels)
         }
 
     }
@@ -285,11 +286,11 @@ fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
 
 
 @Composable
-fun LastMeasure(lastMeasurement: Int?) {
+fun LastMeasure(lastMeasurement: Int?, glucoseLevels: GlucoseLevels) {
 
     lastMeasurement?.let { measurement ->
         val textColor = when (measurement) {
-            in 80..130 -> Color.Green // Si la medición está entre 80 y 130
+            in glucoseLevels.levelMin..glucoseLevels.levelMax -> Color.Green // Si la medición está entre los valores aceptables.
             else -> Color.Red.copy(alpha = 0.8f) // Por defecto
         }
 

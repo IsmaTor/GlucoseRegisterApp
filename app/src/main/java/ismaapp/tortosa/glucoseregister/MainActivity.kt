@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var glucoseRepository: GlucoseRepository
     private lateinit var glucoseService: IGlucoseService
     private lateinit var printService: IPrintService
-    private lateinit var glucoseLevels: IGlucoseLevels
+    private lateinit var glucoseLevelsImp: IGlucoseLevels
+    private lateinit var glucoseLevels: GlucoseLevels
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -59,7 +60,8 @@ class MainActivity : ComponentActivity() {
         glucoseRepository = GlucoseRepository(databaseGlucose)
         glucoseService = GlucoseServiceImp(glucoseRepository)
         printService = PrintServiceImp(glucoseService)
-        glucoseLevels = GlucoseLevelsImp(glucoseRepository)
+        glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
+        glucoseLevels = glucoseLevelsImp.levels
 
         val dbHelper = GlucoseDBHelper(this)
         dbHelper.createTablesIfNotExists(databaseGlucose)
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Insertar valores iniciales solo si no existen
-        if (glucoseLevels.levels == null) {
+        if (glucoseLevelsImp.levels == null) {
             val initialLevels = GlucoseLevels(130, 80)
             glucoseRepository.insertInitialLevels(initialLevels)
         }
@@ -101,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = "glucoseMeasurement"
                         ) {
                             composable("glucoseMeasurement") {
-                                GlucoseMeasurementScreen(glucoseService, navController)
+                                GlucoseMeasurementScreen(glucoseService, glucoseLevels, navController)
                             }
                             composable("historial/{pageNumber}") { backStackEntry ->
                                 val pageNumber =
@@ -128,12 +130,12 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("rangeTime") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseTimeRangeScreen(glucoseService = glucoseService)
+                                    GlucoseTimeRangeScreen(glucoseService = glucoseService, glucoseLevels = glucoseLevels)
                                 }
                             }
                             composable("graphic") {
                                 Surface(color = Color.DarkGray) {
-                                    GraphicsScreen(glucoseService = glucoseService, navController = navController)
+                                    GraphicsScreen(glucoseService = glucoseService, glucoseLevels = glucoseLevels, navController = navController)
                                 }
                             }
                             composable("graphicDetail/{intervalHours}") { navBackStackEntry ->
@@ -141,7 +143,7 @@ class MainActivity : ComponentActivity() {
                                 Surface(
                                     color = Color.DarkGray
                                     ) {
-                                    GraphicDetailScreen(glucoseService, intervalHours, onNavigateBack = {
+                                    GraphicDetailScreen(glucoseService, glucoseLevels, intervalHours, onNavigateBack = {
                                         navController.popBackStack()
                                     })
                                 }
@@ -153,7 +155,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("configuration") {
                                 Surface(color = Color.DarkGray) {
-                                    GlucoseConfigurationScreen(glucoseLevels = glucoseLevels, glucoseRepository = glucoseRepository)
+                                    GlucoseConfigurationScreen(glucoseLevels = glucoseLevelsImp, glucoseRepository = glucoseRepository)
                                 }
                             }
                         }

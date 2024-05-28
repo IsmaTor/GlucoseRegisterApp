@@ -7,14 +7,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels;
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement;
 
 public class TimeRangeServiceImp implements ITimeRangeService{
     private static final String LOG_NAME = "GlucoseRepository";
     private final IGlucoseService glucoseService;
+    private final GlucoseLevels glucoseLevels;
 
-    public TimeRangeServiceImp(IGlucoseService glucoseServices) {
+    public TimeRangeServiceImp(IGlucoseService glucoseServices, GlucoseLevels glucoseLevels) {
         this.glucoseService = glucoseServices;
+        this.glucoseLevels = glucoseLevels;
     }
 
     //Método para calcular el porcentaje de valores según intervalo de tiempo.
@@ -37,9 +41,9 @@ public class TimeRangeServiceImp implements ITimeRangeService{
                 if (!measurementsInInterval.isEmpty()) {
                     for (GlucoseMeasurement measurement : measurementsInInterval) {
                         int glucoseValue = measurement.getGlucoseValue();
-                        if (glucoseValue < 80) {
+                        if (glucoseValue < glucoseLevels.getLevelMin()) {
                             lowCount++;
-                        } else if (glucoseValue <= 130) {
+                        } else if (glucoseValue <= glucoseLevels.getLevelMax()) {
                             normalCount++;
                         } else {
                             highCount++;
@@ -51,10 +55,9 @@ public class TimeRangeServiceImp implements ITimeRangeService{
             double totalCategories = (double) lowCount + normalCount + highCount;
 
             if (totalCategories > 0) {
-                glucosePercentages.put("Bajo (<80)", (lowCount / totalCategories) * 100.0);
-                glucosePercentages.put("Normal (80-130)", (normalCount / totalCategories) * 100.0);
-                glucosePercentages.put("Alto (>130)", (highCount / totalCategories) * 100.0);
-
+                glucosePercentages.put("Bajo (<" + glucoseLevels.getLevelMin() + ")", (lowCount / totalCategories) * 100.0);
+                glucosePercentages.put("Normal (" + glucoseLevels.getLevelMin() + "-" + glucoseLevels.getLevelMax() + ")", (normalCount / totalCategories) * 100.0);
+                glucosePercentages.put("Alto (>" + glucoseLevels.getLevelMax() + ")", (highCount / totalCategories) * 100.0);
             } else {
                 Log.w(LOG_NAME, "No valid glucose measurements found to calculate percentages.");
             }

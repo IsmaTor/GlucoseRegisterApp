@@ -24,15 +24,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.utils.buttonModifier
 
 @Composable
-fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService) {
+fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels) {
     val calculator = remember {
         TimeRangeServiceImp(
-            glucoseService
+            glucoseService,
+            glucoseLevels
         )
     }
     val (intervalHours, setIntervalHours) = remember { mutableStateOf(24) }
