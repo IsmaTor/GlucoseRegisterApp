@@ -2,12 +2,15 @@ package ismaapp.tortosa.glucoseregister.ui.screen
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -76,12 +79,16 @@ fun GlucoseConfiguration(
             modifier = Modifier.padding(bottom = 20.dp) //Espacio inferior.
         )
 
-        GlucoseInput(
-            glucoseValue = newLevelMax,
-            onValueChange = { newValue ->
-                newLevelMax = newValue
-            }
-        )
+        Box(modifier = Modifier
+            .fillMaxWidth(0.6f) // Ocupa el 80% del ancho disponible
+            .padding(horizontal = 16.dp)) { // Ajuste de padding si es necesario) {
+            GlucoseInput(
+                glucoseValue = newLevelMax,
+                onValueChange = { newValue ->
+                    newLevelMax = newValue
+                }
+            )
+        }
 
         Text(
             "Configuración nivel mínimo: ",
@@ -90,12 +97,16 @@ fun GlucoseConfiguration(
             modifier = Modifier.padding(bottom = 20.dp) //Espacio inferior.
         )
 
-        GlucoseInput(
-            glucoseValue = newLevelMin,
-            onValueChange = { newValue ->
-                newLevelMin = newValue
-            }
-        )
+        Box(modifier = Modifier
+            .fillMaxWidth(0.6f)
+            .padding(horizontal = 16.dp)) {
+            GlucoseInput(
+                glucoseValue = newLevelMin,
+                onValueChange = { newValue ->
+                    newLevelMin = newValue
+                }
+            )
+        }
 
         //Botón para confirmar los cambios
         Button(
@@ -111,7 +122,7 @@ fun GlucoseConfiguration(
                 // Log para verificar cuándo se llama a onValuesChanged y qué valores se pasan
                 Log.d("GlucoseConfiguration", "Llamado a onValuesChanged con: $glucoseLevels")
             },
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Guardar cambios")
         }
