@@ -7,12 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,29 +28,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
+import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseLevels
+import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
+import kotlinx.coroutines.delay
 
 @Composable
 fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository: GlucoseRepository) {
     var glucoseLevelsUpdate by remember { mutableStateOf(glucoseLevels.levels ?: GlucoseLevels(130, 80)) }
+    var showMessage by remember { mutableStateOf(false) }
+    var isOperationSuccessful by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
 
-    // Log para verificar los valores iniciales de glucoseLevels
-    Log.d("GlucoseConfigurationScreen", "GlucoseLevels inicial: $glucoseLevelsUpdate")
+    // El mensaje desaparecerá después del tiempo indicado.
+    LaunchedEffect(showMessage) {
+        if (showMessage) {
+            delay(5000) // 5 segundos.
+            showMessage = false // false para que desaparezca.
+        }
+    }
 
     GlucoseConfiguration(glucoseLevelsUpdate) { updatedLevels ->
-        // Actualiza los niveles de glucosa con los nuevos valores
+        //Actualiza los niveles de glucosa con los nuevos valores.
         glucoseLevelsUpdate = updatedLevels
 
-        // Actualiza los valores en la base de datos
-        glucoseRepository.updateLevels(glucoseLevelsUpdate)
+        //Actualiza los valores en la base de datos.
+        val glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
+        glucoseLevelsImp.updateLevels(glucoseLevelsUpdate)
 
-        // Log para verificar los niveles de glucosa actualizados
-        Log.d("GlucoseConfigurationScreen", "GlucoseLevels actualizados: $updatedLevels")
+        isOperationSuccessful = glucoseLevelsImp.isLevelSuccess
+        message = if (isOperationSuccessful) "Valores añadidos correctamente" else "ERROR: Valores no añadidos"
+        showMessage = true
+
     }
-    // Obtener y mostrar todos los registros de la tabla de glucosa
+
+    //Muestra el mensaje de confirmación.
+    if (showMessage) {
+        SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isOperationSuccessful, message = message)
+    }
+
+    //Obtiene y muestra los niveles de la tabla de niveles.
     val allGlucoseLevels = glucoseLevels.allGlucoseLevels
     for (levels in allGlucoseLevels) {
-        Log.d("GlucoseConfigurationScreen", "ID: ${levels.getId()}, Max: ${levels.getLevelMax()}, Min: ${levels.getLevelMin()}")
+        Log.d("GlucoseConfigurationScreen", "ID: ${levels.id}, Max: ${levels.levelMax}, Min: ${levels.levelMin}")
     }
 }
 
@@ -59,29 +82,31 @@ fun GlucoseConfiguration(
     var newLevelMax by remember { mutableIntStateOf(glucoseLevels.levelMax) }
     var newLevelMin by remember { mutableIntStateOf(glucoseLevels.levelMin) }
 
+    val paddingSpace = 8.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(paddingSpace)
     ) {
         Text(
             "CONFIGURACIÓN DE LOS NIVELES",
             style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = 20.dp) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
         )
 
         Text(
             "Configuración nivel máximo: ",
             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = 20.dp) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
         )
 
         Box(modifier = Modifier
-            .fillMaxWidth(0.6f) // Ocupa el 80% del ancho disponible
-            .padding(horizontal = 16.dp)) { // Ajuste de padding si es necesario) {
+            .fillMaxWidth(0.6f) //Ocupa el 80% del ancho disponible.
+            .padding(horizontal = 16.dp)) {
             GlucoseInput(
                 glucoseValue = newLevelMax,
                 onValueChange = { newValue ->
@@ -94,7 +119,7 @@ fun GlucoseConfiguration(
             "Configuración nivel mínimo: ",
             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = 20.dp) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
         )
 
         Box(modifier = Modifier
@@ -108,25 +133,22 @@ fun GlucoseConfiguration(
             )
         }
 
+        //Separación adicional solo para el botón.
+        Spacer(modifier = Modifier.height(paddingSpace))
+
         //Botón para confirmar los cambios
         Button(
             onClick = {
                 glucoseLevels.levelMax = newLevelMax
                 glucoseLevels.levelMin = newLevelMin
 
-                // Log para verificar los valores antes de llamar a onValuesChanged
-                Log.d("GlucoseConfiguration", "Nuevos niveles de glucosa: $glucoseLevels")
-
                 onValuesChanged(glucoseLevels)
-
-                // Log para verificar cuándo se llama a onValuesChanged y qué valores se pasan
-                Log.d("GlucoseConfiguration", "Llamado a onValuesChanged con: $glucoseLevels")
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
+                .width(200.dp) //ancho del botón.
+                .height(50.dp) //alto del botón.
         ) {
-            Text("Guardar cambios")
+            Text("Guardar cambios", style = TextStyle(fontSize = 18.sp))
         }
     }
 }
-
-

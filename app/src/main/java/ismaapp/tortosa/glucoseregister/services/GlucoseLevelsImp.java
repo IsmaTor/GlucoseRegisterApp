@@ -1,5 +1,6 @@
 package ismaapp.tortosa.glucoseregister.services;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import java.util.ArrayList;
@@ -11,9 +12,15 @@ import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository;
 
 public class GlucoseLevelsImp implements IGlucoseLevels {
     private final GlucoseRepository glucoseRepository;
+    private boolean levelSuccess = false;
 
     public GlucoseLevelsImp(GlucoseRepository glucoseRepository) {
         this.glucoseRepository = glucoseRepository;
+    }
+
+    @Override
+    public boolean isLevelSuccess() {
+        return levelSuccess;
     }
 
     //Método para obtener los valores actuales de Levels
@@ -53,6 +60,32 @@ public class GlucoseLevelsImp implements IGlucoseLevels {
             }
         }
         return null;
+    }
+
+    //Método para actualizar los niveles de la tabla levels.
+    @Override
+    public void updateLevels(GlucoseLevels levels) {
+        ContentValues values = new ContentValues();
+        values.put(GlucoseDBHelper.LEVELS_COLUMN_LEVEL_MAX, levels.getLevelMax());
+        values.put(GlucoseDBHelper.LEVELS_COLUMN_LEVEL_MIN, levels.getLevelMin());
+
+        String selection = GlucoseDBHelper.LEVELS_COLUMN_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(levels.getId()) };
+
+        int count = glucoseRepository.getDatabase().update(
+                GlucoseDBHelper.LEVELS_TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+        );
+
+        if (count > 0) {
+            levelSuccess = true;
+            Log.d("GlucoseLevelsImp", "Niveles de glucosa actualizados correctamente");
+        } else {
+            levelSuccess = false;
+            Log.e("GlucoseLevelsImp", "Error al actualizar los niveles de glucosa");
+        }
     }
 
     @Override

@@ -93,7 +93,9 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
                     launchSingleTop = true
                 }
             },
-            modifier = Modifier.shadow(4.dp) //Agrega sombra al icono.
+            modifier = Modifier
+                .size(60.dp) //tamaño del recuadro del icono.
+                .shadow(4.dp) //agrega sombra al icono.
         ) {
             Icon(Icons.Default.Settings,
                 contentDescription = "Configuración",
