@@ -38,14 +38,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
 import ismaapp.tortosa.glucoseregister.utils.buttonModifier
 
 @Composable
-fun GraphicsScreen(glucoseService: IGlucoseService, navController: NavController) {
+fun GraphicsScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels, navController: NavController) {
     val lastDaysService = remember {
-        TimeRangeServiceImp(glucoseService)
+        TimeRangeServiceImp(glucoseService, glucoseLevels)
     }
     val (intervalHours, setIntervalHours) = remember { mutableStateOf(0) }
     val (showMessage, setShowMessage) = remember { mutableStateOf(false) }
@@ -143,11 +144,12 @@ fun GraphicsScreen(glucoseService: IGlucoseService, navController: NavController
 @Composable
 fun GraphicDetailScreen(
     glucoseService: IGlucoseService,
+    glucoseLevels: GlucoseLevels,
     intervalHours: Int,
     onNavigateBack: () -> Unit
 ) {
     val measurementsToShow = remember(intervalHours) {
-        TimeRangeServiceImp(glucoseService).getLastDays(intervalHours)
+        TimeRangeServiceImp(glucoseService, glucoseLevels).getLastDays(intervalHours)
     }
 
     Surface(

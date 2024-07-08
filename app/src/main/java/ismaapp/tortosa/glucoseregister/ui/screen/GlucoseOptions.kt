@@ -4,24 +4,16 @@ import android.Manifest
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,19 +21,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
 import ismaapp.tortosa.glucoseregister.utils.OptionButtons
+import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
 import ismaapp.tortosa.glucoseregister.utils.params.DialogOptionsParams
 import kotlinx.coroutines.delay
 
@@ -72,7 +63,7 @@ fun GlucoseOptionsScreen(
         }
     }
 
-    // Función para realizar la descarga después de verificar permisos.
+    //Función para realizar la descarga después de verificar permisos.
     fun performDownload(printService: IPrintService, context: Context) {
         printService.pdfAllValues(context, glucoseMeasurements)
     }
@@ -82,15 +73,15 @@ fun GlucoseOptionsScreen(
         printService.pdf30Values(context, glucoseMeasurements)
     }
 
-    // RequestPermissionLauncher para solicitar WRITE_EXTERNAL_STORAGE
+    //RequestPermissionLauncher para solicitar WRITE_EXTERNAL_STORAGE.
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isPermissionGranted ->
         if (isPermissionGranted) {
-            // Permiso concedido, proceder con la descarga
+            //Permiso concedido, proceder con la descarga.
             performDownload(printService, context)
         } else {
-            // Permiso denegado, mostrar mensaje de error o realizar alguna acción
+            //Permiso denegado, mostrar mensaje de error o realizar alguna acción.
             showMessage = true
             isMeasurementSuccessful = false
             message = "Permiso denegado, acepte el permiso de almacenamiento."
@@ -180,30 +171,30 @@ fun GlucoseOptionsScreen(
                         glucoseService.deleteLastMeasure()
                     }
                     print -> {
-                        // Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar
+                        //Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar.
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE
                             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
                         ) {
-                            // Permiso concedido, proceder con la descarga
+                            //Permiso concedido.
                             performDownload(printService, context)
                         } else {
-                            // Permiso no concedido, solicitar permiso al usuario
+                            //Permiso no concedido.
                             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         }
                     }
                     print30 -> {
-                        // Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar
+                        //Verificar permiso WRITE_EXTERNAL_STORAGE antes de descargar.
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE
                             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
                         ) {
-                            // Permiso concedido, proceder con la descarga
+                            //Permiso concedido.
                             performDownload30(printService, context)
                         } else {
-                            // Permiso no concedido, solicitar permiso al usuario
+                            // Permiso no concedido.
                             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         }
                     }
@@ -223,38 +214,6 @@ fun GlucoseOptionsScreen(
 
         SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
 
-    }
-}
-
-@Composable
-fun SuccessfulMessage(
-    showMessage: Boolean,
-    isMeasurementSuccessful: Boolean,
-    message: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        if (showMessage) {
-            //Muestra el mensaje.
-            val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
-            val color = if (isMeasurementSuccessful) Color.Green else Color.Red
-
-            Row(
-                modifier = Modifier
-                    .background(color)
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .zIndex(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(message, color = Color.White)
-            }
-        }
     }
 }
 
