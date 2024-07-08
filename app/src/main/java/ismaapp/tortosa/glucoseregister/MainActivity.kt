@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = "glucoseMeasurement"
                         ) {
                             composable("glucoseMeasurement") {
-                                GlucoseMeasurementScreen(glucoseService, glucoseLevels, navController)
+                                GlucoseMeasurementScreen(glucoseService, glucoseRepository, navController)
                             }
                             composable("historial/{pageNumber}") { backStackEntry ->
                                 val pageNumber =

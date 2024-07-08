@@ -52,17 +52,22 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
+import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
+import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.ui.theme.Purple40
 import kotlinx.coroutines.delay
 
 @Composable
-fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels, navController: NavController) {
+fun GlucoseMeasurementScreen(
+    glucoseService: IGlucoseService,
+    glucoseRepository: GlucoseRepository,
+    navController: NavController
+) {
     var glucoseValue by remember { mutableIntStateOf(0) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
     var showMessage by remember { mutableStateOf(false) }
-    var lastMeasurement: Int? by remember { mutableStateOf(null) }
+    var lastMeasurement by remember { mutableStateOf<Int?>(null) }
     var message by remember { mutableStateOf("") }
 
     // Obtener la última medición de la base de datos.
@@ -84,8 +89,8 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.End, //Alinea los elementos al final derecha.
-        verticalAlignment = Alignment.Top //Alinea los elementos en la parte superior derecha.
+        horizontalArrangement = Arrangement.End, // Alinea los elementos al final derecha.
+        verticalAlignment = Alignment.Top // Alinea los elementos en la parte superior derecha.
     ) {
         IconButton(
             onClick = {
@@ -94,13 +99,15 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
                 }
             },
             modifier = Modifier
-                .size(60.dp) //tamaño del recuadro del icono.
-                .shadow(4.dp) //agrega sombra al icono.
+                .size(60.dp) // tamaño del recuadro del icono.
+                .shadow(4.dp) // agrega sombra al icono.
         ) {
-            Icon(Icons.Default.Settings,
+            Icon(
+                Icons.Default.Settings,
                 contentDescription = "Configuración",
                 modifier = Modifier.size(60.dp),
-                tint = Purple40)
+                tint = Purple40
+            )
         }
     }
 
@@ -109,7 +116,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
             .fillMaxSize()
             .padding(100.dp)
     ) {
-        //Ingresar mediciones
+        // Ingresar mediciones
         GlucoseInput(
             glucoseValue = glucoseValue,
             onValueChange = { newValue ->
@@ -127,6 +134,9 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
                 showMessage = true
                 message = newMessage
                 glucoseValue = newGlucoseValue
+
+                // Obtener la última medición de la base de datos actualizada
+                lastMeasurement = glucoseService.lastGlucoseMeasurement
             },
             onLastMeasurementUpdated = { newLastMeasurement ->
                 lastMeasurement = newLastMeasurement
@@ -141,7 +151,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
                 .padding(8.dp)
         ) {
             if (showMessage) {
-                //Muestra el mensaje.
+                // Muestra el mensaje.
                 val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
                 val color = if (isMeasurementSuccessful) Color.Green else Color.Red
 
@@ -159,7 +169,7 @@ fun GlucoseMeasurementScreen(glucoseService: IGlucoseService, glucoseLevels: Glu
                 }
             }
             // Muestra la última medición
-            LastMeasure(lastMeasurement = lastMeasurement, glucoseLevels = glucoseLevels)
+            LastMeasure(lastMeasurement = lastMeasurement, glucoseRepository = glucoseRepository)
         }
 
     }
@@ -285,30 +295,30 @@ fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
     Spacer(modifier = Modifier.height(16.dp * scale))
 }
 
-
-
 @Composable
-fun LastMeasure(lastMeasurement: Int?, glucoseLevels: GlucoseLevels) {
+fun LastMeasure(lastMeasurement: Int?, glucoseRepository: GlucoseRepository) {
+    val textColor = remember { mutableStateOf(Color.Red.copy(alpha = 0.8f)) }
+    val glucoseLevelsImp = remember { GlucoseLevelsImp(glucoseRepository) }
+
+    val levelMax = glucoseLevelsImp.getLevelMaxDB()
+    val levelMin = glucoseLevelsImp.getLevelMinDB()
 
     lastMeasurement?.let { measurement ->
-        val textColor = when (measurement) {
-            in glucoseLevels.levelMin..glucoseLevels.levelMax -> Color.Green // Si la medición está entre los valores aceptables.
-            else -> Color.Red.copy(alpha = 0.8f) // Por defecto
+        if (levelMin < levelMax) {
+            textColor.value = when {
+                measurement in levelMin..levelMax -> Color.Green
+                else -> Color.Red.copy(alpha = 0.8f)
+            }
         }
-
-        // Valores para ajustar el recuadro
-        val xOffset = 0.dp
-        val yOffset = 100.dp
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .offset(x = xOffset, y = yOffset)
+                .offset(x = 0.dp, y = 100.dp)
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 color = Color.LightGray
             ) {
@@ -323,7 +333,7 @@ fun LastMeasure(lastMeasurement: Int?, glucoseLevels: GlucoseLevels) {
                     )
                     Text(
                         text = "$measurement",
-                        color = textColor,
+                        color = textColor.value,
                         fontSize = 8.em,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
