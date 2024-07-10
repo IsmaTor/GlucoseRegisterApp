@@ -81,8 +81,19 @@ fun GlucoseConfiguration(
 ) {
     var newLevelMax by remember { mutableIntStateOf(glucoseLevels.levelMax) }
     var newLevelMin by remember { mutableIntStateOf(glucoseLevels.levelMin) }
+    var showMessage by remember { mutableStateOf(false) }
+    var isOperationSuccessful by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
 
     val paddingSpace = 8.dp
+
+    // El mensaje desaparecerá después del tiempo indicado.
+    LaunchedEffect(showMessage) {
+        if (showMessage) {
+            delay(5000) // 5 segundos.
+            showMessage = false // false para que desaparezca.
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -139,16 +150,26 @@ fun GlucoseConfiguration(
         //Botón para confirmar los cambios
         Button(
             onClick = {
-                glucoseLevels.levelMax = newLevelMax
-                glucoseLevels.levelMin = newLevelMin
-
-                onValuesChanged(glucoseLevels)
+                try {
+                    glucoseLevels.levelMax = newLevelMax
+                    glucoseLevels.levelMin = newLevelMin
+                    glucoseLevels.setLevels(newLevelMax, newLevelMin)
+                    onValuesChanged(glucoseLevels)
+                } catch (e: IllegalArgumentException) {
+                    isOperationSuccessful = false
+                    message = e.message ?: "Error desconocido"
+                }
+                showMessage = true
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
                 .width(200.dp) //ancho del botón.
                 .height(50.dp) //alto del botón.
         ) {
             Text("Guardar cambios", style = TextStyle(fontSize = 18.sp))
+        }
+        // Muestra el mensaje de confirmación o error.
+        if (showMessage) {
+            SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isOperationSuccessful, message = message)
         }
     }
 }
