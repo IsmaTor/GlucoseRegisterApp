@@ -57,7 +57,11 @@ import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
 import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.ui.theme.BackgroundGrey
+import ismaapp.tortosa.glucoseregister.ui.theme.DarkRed
 import ismaapp.tortosa.glucoseregister.ui.theme.Pink300
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftGreen
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftRed
 import kotlinx.coroutines.delay
 
 @Composable
@@ -155,7 +159,7 @@ fun GlucoseMeasurementScreen(
             if (showMessage) {
                 // Muestra el mensaje.
                 val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
-                val color = if (isMeasurementSuccessful) Color.Green else Color.Red
+                val color = if (isMeasurementSuccessful) SoftGreen else DarkRed
 
                 Row(
                     modifier = Modifier
@@ -269,8 +273,6 @@ fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
 
     var isError by remember { mutableStateOf(false) }
 
-    val backgroundColor = Color(0xFF808080).copy(alpha = 0.9f)
-
     Box(
         modifier = Modifier.scale(scale)
     ) {
@@ -292,7 +294,7 @@ fun GlucoseInput(glucoseValue: Int, onValueChange: (Int) -> Unit) {
             isError = isError,
             textStyle = TextStyle(color = Color.White, fontSize = 24.sp * scale),
             modifier = Modifier
-                .background(backgroundColor)
+                .background(BackgroundGrey)
                 .fillMaxWidth()
         )
     }
@@ -311,8 +313,8 @@ fun LastMeasure(lastMeasurement: Int?, glucoseRepository: GlucoseRepository) {
     lastMeasurement?.let { measurement ->
         if (levelMin < levelMax) {
             textColor.value = when {
-                measurement in levelMin..levelMax -> Color.Green
-                else -> Color.Red.copy(alpha = 0.8f)
+                measurement in levelMin..levelMax -> SoftGreen
+                else -> SoftRed
             }
         }
 
