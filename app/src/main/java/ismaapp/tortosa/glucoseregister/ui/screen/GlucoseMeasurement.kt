@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -55,7 +57,7 @@ import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
 import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
-import ismaapp.tortosa.glucoseregister.ui.theme.Purple40
+import ismaapp.tortosa.glucoseregister.ui.theme.Pink300
 import kotlinx.coroutines.delay
 
 @Composable
@@ -106,7 +108,7 @@ fun GlucoseMeasurementScreen(
                 Icons.Default.Settings,
                 contentDescription = "Configuración",
                 modifier = Modifier.size(60.dp),
-                tint = Purple40
+                tint = Pink300
             )
         }
     }
@@ -216,7 +218,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(50.dp, 50.dp, 0.dp, 0.dp)),
+            colors = ButtonDefaults.buttonColors(Pink300)
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "register")
             Spacer(modifier = Modifier.width(4.dp))
@@ -233,7 +236,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(Pink300)
         ) {
             Icon(Icons.Default.DateRange, contentDescription = "historical")
             Spacer(modifier = Modifier.width(4.dp))
@@ -249,7 +253,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(0.dp, 0.dp, 50.dp, 50.dp)),
+            colors = ButtonDefaults.buttonColors(Pink300)
         ) {
             Icon(Icons.Default.Info, contentDescription = "graphical")
             Spacer(modifier = Modifier.width(4.dp))
