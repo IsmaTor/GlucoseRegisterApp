@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.utils.buttonModifier
 
 @Composable
@@ -71,7 +73,8 @@ fun GraphicsScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels
                 setShowMessage(result.isEmpty())
                 navController.navigate("graphicDetail/$currentInterval")
             },
-            modifier = buttonModifier(intervalHours == 48)
+            modifier = buttonModifier(intervalHours == 48),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("48 HORAS", color = Color.White)
         }
@@ -84,7 +87,8 @@ fun GraphicsScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels
                 setShowMessage(result.isEmpty())
                 navController.navigate("graphicDetail/$currentInterval")
             },
-            modifier = buttonModifier(intervalHours == 168)
+            modifier = buttonModifier(intervalHours == 168),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("1 SEMANA", color = Color.White)
         }
@@ -97,7 +101,8 @@ fun GraphicsScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels
                 setShowMessage(result.isEmpty())
                 navController.navigate("graphicDetail/$currentInterval")
             },
-            modifier = buttonModifier(intervalHours == 720)
+            modifier = buttonModifier(intervalHours == 720),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("1 MES", color = Color.White)
         }
@@ -110,7 +115,8 @@ fun GraphicsScreen(glucoseService: IGlucoseService, glucoseLevels: GlucoseLevels
                 setShowMessage(result.isEmpty())
                 navController.navigate("graphicDetail/$currentInterval")
             },
-            modifier = buttonModifier(intervalHours == 8760)
+            modifier = buttonModifier(intervalHours == 8760),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("1 AÑO", color = Color.White)
         }

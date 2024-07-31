@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 
 @Composable
 fun GlucoseHistoryScreen(
@@ -82,7 +84,8 @@ fun GlucoseHistoryScreen(
                 .fillMaxWidth()
                 .padding(2.dp)
                 .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(50.dp, 50.dp, 0.dp, 0.dp)),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Icon(Icons.Filled.Menu, contentDescription = "Menú")
             Text("   OPCIONES", color = Color.White)
@@ -98,7 +101,8 @@ fun GlucoseHistoryScreen(
                 .fillMaxWidth()
                 .padding(2.dp)
                 .heightIn(min = 24.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(0.dp, 0.dp, 50.dp, 50.dp)),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("   VER TIEMPO DE RANGO", color = Color.White)
         }
@@ -186,7 +190,8 @@ fun NavigationButtons(
                 .weight(1.1f)
                 .heightIn(min = 24.dp)
                 .padding(7.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("ANTERIOR",
                 fontSize = 14.sp) //Tamaño del texto.
@@ -197,10 +202,11 @@ fun NavigationButtons(
                 navController.popBackStack("glucoseMeasurement", inclusive = false)
             },
             modifier = Modifier
-                .weight(0.8f)
+                .weight(0.7f)
                 .heightIn(min = 24.dp)
                 .padding(8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Icon(Icons.Filled.Home, contentDescription = "Home")
         }
@@ -213,7 +219,8 @@ fun NavigationButtons(
                 .weight(1.1f)
                 .heightIn(min = 24.dp)
                 .padding(7.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("SIGUIENTE",
                 fontSize = 14.sp) //Tamaño del texto.

@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +58,7 @@ import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.ui.theme.BackgroundGrey
 import ismaapp.tortosa.glucoseregister.ui.theme.DarkRed
-import ismaapp.tortosa.glucoseregister.ui.theme.Pink300
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftGreen
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftRed
 import kotlinx.coroutines.delay
@@ -112,7 +111,7 @@ fun GlucoseMeasurementScreen(
                 Icons.Default.Settings,
                 contentDescription = "Configuración",
                 modifier = Modifier.size(60.dp),
-                tint = Pink300
+                tint = SoftYellow
             )
         }
     }
@@ -222,8 +221,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(50.dp, 50.dp, 0.dp, 0.dp)),
-            colors = ButtonDefaults.buttonColors(Pink300)
+                .clip(RoundedCornerShape(50.dp, 50.dp, 0.dp, 0.dp)), //botón ovalado desde arriba.
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "register")
             Spacer(modifier = Modifier.width(4.dp))
@@ -240,8 +239,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            colors = ButtonDefaults.buttonColors(Pink300)
+                .clip(RoundedCornerShape(8.dp)), //botón con bordes redondeados.
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Icon(Icons.Default.DateRange, contentDescription = "historical")
             Spacer(modifier = Modifier.width(4.dp))
@@ -257,8 +256,8 @@ fun ButtonsHome(
                 .fillMaxWidth()
                 .padding(4.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(0.dp, 0.dp, 50.dp, 50.dp)),
-            colors = ButtonDefaults.buttonColors(Pink300)
+                .clip(RoundedCornerShape(0.dp, 0.dp, 50.dp, 50.dp)), //botón ovalado desde abajo.
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Icon(Icons.Default.Info, contentDescription = "graphical")
             Spacer(modifier = Modifier.width(4.dp))
