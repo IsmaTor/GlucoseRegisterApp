@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import ismaapp.tortosa.glucoseregister.entities.GlucoseLevels
 import ismaapp.tortosa.glucoseregister.services.TimeRangeServiceImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.utils.buttonModifier
 
 @Composable
@@ -60,7 +62,8 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService, glucoseLevels: Gluco
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            buttonModifier(selected = intervalHours == 1)
+            buttonModifier(selected = intervalHours == 1),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("1 HORA", color = Color.White)
         }
@@ -73,7 +76,8 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService, glucoseLevels: Gluco
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            buttonModifier(selected = intervalHours == 24)
+            buttonModifier(selected = intervalHours == 24),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("24 HORAS", color = Color.White)
         }
@@ -86,7 +90,8 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService, glucoseLevels: Gluco
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            buttonModifier(selected = intervalHours == 168)
+            buttonModifier(selected = intervalHours == 168),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("7 DÍAS", color = Color.White)
         }
@@ -99,7 +104,8 @@ fun GlucoseTimeRangeScreen(glucoseService: IGlucoseService, glucoseLevels: Gluco
                 setGlucosePercentagesByCategory(percentages)
                 setShowMessage(percentages.isEmpty())
             },
-            buttonModifier(selected = intervalHours == 720)
+            buttonModifier(selected = intervalHours == 720),
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("30 DÍAS", color = Color.White)
         }

@@ -12,8 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 
 @Composable
 fun buttonModifier(selected: Boolean): Modifier {
@@ -39,7 +41,8 @@ fun OptionButtons(
             .padding(2.dp)
             .heightIn(min = 24.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(color = color)
+            .background(color = color),
+        colors = ButtonDefaults.buttonColors(SoftYellow)
     ) {
         Icon(icon, contentDescription = text)
         Text(text, color = Color.White)

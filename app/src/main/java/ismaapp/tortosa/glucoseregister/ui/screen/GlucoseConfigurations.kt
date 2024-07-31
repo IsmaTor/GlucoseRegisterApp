@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
 import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseLevels
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
 import kotlinx.coroutines.delay
 
@@ -81,8 +85,19 @@ fun GlucoseConfiguration(
 ) {
     var newLevelMax by remember { mutableIntStateOf(glucoseLevels.levelMax) }
     var newLevelMin by remember { mutableIntStateOf(glucoseLevels.levelMin) }
+    var showMessage by remember { mutableStateOf(false) }
+    var isOperationSuccessful by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
 
     val paddingSpace = 8.dp
+
+    // El mensaje desaparecerá después del tiempo indicado.
+    LaunchedEffect(showMessage) {
+        if (showMessage) {
+            delay(5000) // 5 segundos.
+            showMessage = false // false para que desaparezca.
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -139,16 +154,28 @@ fun GlucoseConfiguration(
         //Botón para confirmar los cambios
         Button(
             onClick = {
-                glucoseLevels.levelMax = newLevelMax
-                glucoseLevels.levelMin = newLevelMin
-
-                onValuesChanged(glucoseLevels)
+                try {
+                    glucoseLevels.levelMax = newLevelMax
+                    glucoseLevels.levelMin = newLevelMin
+                    glucoseLevels.setLevels(newLevelMax, newLevelMin)
+                    onValuesChanged(glucoseLevels)
+                } catch (e: IllegalArgumentException) {
+                    isOperationSuccessful = false
+                    message = e.message ?: "Error desconocido"
+                }
+                showMessage = true
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
                 .width(200.dp) //ancho del botón.
                 .height(50.dp) //alto del botón.
+                .clip(CutCornerShape(20.dp, 20.dp, 20.dp, 20.dp)), //botón romboide
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("Guardar cambios", style = TextStyle(fontSize = 18.sp))
+        }
+        // Muestra el mensaje de confirmación o error.
+        if (showMessage) {
+            SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isOperationSuccessful, message = message)
         }
     }
 }
