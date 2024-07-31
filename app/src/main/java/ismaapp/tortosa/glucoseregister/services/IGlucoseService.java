@@ -18,6 +18,8 @@ public interface IGlucoseService {
     public int getLastGlucoseMeasurement();
 
     List<GlucoseMeasurement> getLast30GlucoseMeasurement();
+    //Número total de registros en la base de datos.
+    int getTotalGlucoseMeasurements();
 
     boolean isDatabaseEmptyOrNull();
     List<GlucoseMeasurement> getAllGlucoseMeasurements();

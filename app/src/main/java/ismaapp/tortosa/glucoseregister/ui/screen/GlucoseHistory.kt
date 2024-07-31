@@ -64,6 +64,10 @@ fun GlucoseHistoryScreen(
     // Obtener las mediciones al cargar la página actual
     glucoseMeasurements = glucoseService.getPaginatedGlucoseMeasurements(calculatedPageNumber, pageSize, orderByLatest, orderByHighestGlucose, userSelection)
 
+    //Obtener el número total de registros.
+    val totalRecords = glucoseService.totalGlucoseMeasurements
+    val totalPages = (totalRecords + pageSize -1) / pageSize
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -165,14 +169,15 @@ fun GlucoseHistoryScreen(
             }
         }
         //llamada a los botones de navegación.
-        NavigationButtons(pageNumber = pageNumber, navController = navController)
+        NavigationButtons(pageNumber = pageNumber, navController = navController, totalPages = totalPages)
     }
 }
 
 @Composable
 fun NavigationButtons(
     pageNumber: Int,
-    navController: NavController
+    navController: NavController,
+    totalPages: Int
 ) {
     Row(
         modifier = Modifier
@@ -220,7 +225,8 @@ fun NavigationButtons(
                 .heightIn(min = 24.dp)
                 .padding(7.dp)
                 .clip(RoundedCornerShape(8.dp)),
-            colors = ButtonDefaults.buttonColors(SoftYellow)
+            colors = ButtonDefaults.buttonColors(SoftYellow),
+            enabled = pageNumber < totalPages
         ) {
             Text("SIGUIENTE",
                 fontSize = 14.sp) //Tamaño del texto.
