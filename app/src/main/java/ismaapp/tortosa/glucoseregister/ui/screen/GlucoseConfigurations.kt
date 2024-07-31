@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
 import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseLevels
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
 import kotlinx.coroutines.delay
 
@@ -164,6 +168,8 @@ fun GlucoseConfiguration(
             modifier = Modifier.align(Alignment.CenterHorizontally)
                 .width(200.dp) //ancho del botón.
                 .height(50.dp) //alto del botón.
+                .clip(CutCornerShape(20.dp, 20.dp, 20.dp, 20.dp)), //botón romboide
+            colors = ButtonDefaults.buttonColors(SoftYellow)
         ) {
             Text("Guardar cambios", style = TextStyle(fontSize = 18.sp))
         }

@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat
 import ismaapp.tortosa.glucoseregister.entities.GlucoseMeasurement
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.services.IPrintService
+import ismaapp.tortosa.glucoseregister.ui.theme.DarkRed
 import ismaapp.tortosa.glucoseregister.utils.OptionButtons
 import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
 import ismaapp.tortosa.glucoseregister.utils.params.DialogOptionsParams
@@ -46,7 +47,6 @@ fun GlucoseOptionsScreen(
     val deleteLast = " BORRAR ÚLTIMA"
     val print = " DESCARGAR"
     val print30 = " DESCARGAR30"
-    val darkRed by remember { mutableStateOf(Color(0xFF800000)) }
 
     var showMessage by remember { mutableStateOf(false) }
     var isMeasurementSuccessful by remember { mutableStateOf(false) }
@@ -109,7 +109,7 @@ fun GlucoseOptionsScreen(
 
         //Botón para borrar todas las mediciones.
         OptionButtons(
-            color = darkRed,
+            color = DarkRed,
             text = deleteAll,
             icon = Icons.Filled.Delete,
             onClick = {
@@ -119,7 +119,7 @@ fun GlucoseOptionsScreen(
 
         //Botón para borrar última medición.
         OptionButtons(
-            color = darkRed,
+            color = DarkRed,
             text = deleteLast,
             icon = Icons.Filled.Delete,
             onClick = {
