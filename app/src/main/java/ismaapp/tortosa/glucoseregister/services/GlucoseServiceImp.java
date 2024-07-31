@@ -181,6 +181,22 @@ public class GlucoseServiceImp implements IGlucoseService {
         return glucoseMeasurements;
     }
 
+    //Número total de registros en la base de datos.
+    @Override
+    public int getTotalGlucoseMeasurements() {
+        int totalRecords = 0;
+        String query = "SELECT COUNT(*) FROM " + GlucoseDBHelper.TABLE_NAME;
+        try (Cursor cursor = executeQuery(query)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                totalRecords = cursor.getInt(0);
+            }
+        } catch (SQLiteException e) {
+            logError("Error executing database query", e);
+        }
+        return totalRecords;
+    }
+
+
     @Override
     public boolean isDatabaseEmptyOrNull() {
         try {
