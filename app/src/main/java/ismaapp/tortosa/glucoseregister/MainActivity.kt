@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var printService: IPrintService
     private lateinit var glucoseLevelsImp: IGlucoseLevels
     private lateinit var glucoseLevels: GlucoseLevels
-    private lateinit var databaseLevels: SQLiteDatabase
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -59,37 +58,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         try {
-            Log.d("MainActivity", "Initializing database")
             val dbHelper = GlucoseDBHelper(this)
             databaseGlucose = dbHelper.writableDatabase
-            Log.d("MainActivity", "Database initialized")
-
-            checkTableExists()
 
             glucoseRepository = GlucoseRepository(databaseGlucose)
             glucoseService = GlucoseServiceImp(glucoseRepository)
             printService = PrintServiceImp(glucoseService)
             glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
 
-            // Verificar si los niveles existen y, si no, insertarlos
+            //Insertar valores iniciales solo si no existen.
             if (glucoseLevelsImp.levels == null) {
                 val initialLevels = GlucoseLevels(130, 80)
                 glucoseRepository.insertInitialLevels(initialLevels)
-                Log.d("MainActivity", "Initial levels inserted")
             }
 
-            // Recuperar niveles después de la inserción
+            //Recuperar niveles después de insertarlos
             glucoseLevels = glucoseLevelsImp.levels
-
-            if (glucoseLevels != null) {
-                Log.d("MainActivity", "Retrieved levels: Max=${glucoseLevels.levelMax}, Min=${glucoseLevels.levelMin}")
-            } else {
-                Log.e("MainActivity", "Failed to retrieve levels after insertion.")
-            }
 
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Error initializing database: ${e.message}", Toast.LENGTH_LONG).show()
             Log.e("MainActivity", "Error initializing database: ${e.message}")
         }
 
@@ -200,21 +187,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val REQUEST_DOWNLOAD_PERMISSION_CODE = 100
-    }
-
-    private fun isTableExists(db: SQLiteDatabase, tableName: String): Boolean {
-        val cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name=?", arrayOf(tableName))
-        val exists = cursor.count > 0
-        cursor.close()
-        return exists
-    }
-
-    private fun checkTableExists() {
-        if (isTableExists(databaseGlucose, GlucoseDBHelper.LEVELS_TABLE_NAME)) {
-            Log.d("MainActivity", "La tabla 'levels' existe.");
-        } else {
-            Log.e("MainActivity", "La tabla 'levels' no existe.");
-        }
     }
 }
 

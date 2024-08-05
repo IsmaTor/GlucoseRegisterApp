@@ -62,6 +62,7 @@ fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository:
 
         isOperationSuccessful = glucoseLevelsImp.isLevelSuccess
         message = if (isOperationSuccessful) "Valores añadidos correctamente" else "ERROR: Valores no añadidos"
+        Log.d("GlucoseConfigurationScreen", "Update Result - Success: $isOperationSuccessful, Message: $message")
         showMessage = true
 
     }
@@ -126,6 +127,7 @@ fun GlucoseConfiguration(
                 glucoseValue = newLevelMax,
                 onValueChange = { newValue ->
                     newLevelMax = newValue
+                    Log.d("GlucoseConfiguration", "Nivel máximo actualizado a: $newLevelMax")
                 }
             )
         }
@@ -144,6 +146,7 @@ fun GlucoseConfiguration(
                 glucoseValue = newLevelMin,
                 onValueChange = { newValue ->
                     newLevelMin = newValue
+                    Log.d("GlucoseConfiguration", "Nivel mínimo actualizado a: $newLevelMin")
                 }
             )
         }
@@ -157,11 +160,13 @@ fun GlucoseConfiguration(
                 try {
                     glucoseLevels.levelMax = newLevelMax
                     glucoseLevels.levelMin = newLevelMin
+                    Log.d("GlucoseConfiguration", "Intentando guardar - Max: $newLevelMax, Min: $newLevelMin")
                     glucoseLevels.setLevels(newLevelMax, newLevelMin)
                     onValuesChanged(glucoseLevels)
                 } catch (e: IllegalArgumentException) {
                     isOperationSuccessful = false
                     message = e.message ?: "Error desconocido"
+                    Log.e("GlucoseConfiguration", "Error al guardar niveles: ${e.message}", e)
                 }
                 showMessage = true
             },

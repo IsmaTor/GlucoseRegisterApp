@@ -1,7 +1,6 @@
 package ismaapp.tortosa.glucoseregister.helpers;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -59,21 +58,4 @@ public class GlucoseDBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_LEVELS_ENTRIES);
         onCreate(db);
     }
-
-    public void createTablesIfNotExists(SQLiteDatabase db) {
-        if (!isTableExists(db, TABLE_NAME)) {
-            db.execSQL(SQL_CREATE_ENTRIES);
-        }
-        if (!isTableExists(db, LEVELS_TABLE_NAME)) {
-            db.execSQL(SQL_CREATE_LEVELS_ENTRIES);
-        }
-    }
-
-    private boolean isTableExists(SQLiteDatabase db, String tableName) {
-        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name=?", new String[]{tableName});
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        return exists;
-    }
-
 }

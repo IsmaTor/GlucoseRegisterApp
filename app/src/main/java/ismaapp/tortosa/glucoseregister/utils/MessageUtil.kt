@@ -1,5 +1,6 @@
 package ismaapp.tortosa.glucoseregister.utils
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,8 @@ fun SuccessfulMessage(
             val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
             val color = if (isMeasurementSuccessful) Color.Green else Color.Red
 
+            Log.d("SuccessfulMessage", "Showing message: $message, Success: $isMeasurementSuccessful")
+
             Row(
                 modifier = Modifier
                     .background(color)
@@ -47,6 +50,8 @@ fun SuccessfulMessage(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(message, color = Color.White)
             }
+        } else {
+            Log.d("SuccessfulMessage", "No message to show.")
         }
     }
 }
