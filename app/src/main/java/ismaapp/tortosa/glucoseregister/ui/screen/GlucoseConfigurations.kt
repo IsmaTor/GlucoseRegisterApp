@@ -52,7 +52,7 @@ fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository:
         }
     }
 
-    GlucoseConfiguration(glucoseLevelsUpdate) { updatedLevels ->
+    GlucoseConfiguration(glucoseLevelsUpdate, glucoseRepository) { updatedLevels ->
         //Actualiza los niveles de glucosa con los nuevos valores.
         glucoseLevelsUpdate = updatedLevels
 
@@ -67,11 +67,6 @@ fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository:
 
     }
 
-    //Muestra el mensaje de confirmación.
-    if (showMessage) {
-        SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isOperationSuccessful, message = message)
-    }
-
     //Obtiene y muestra los niveles de la tabla de niveles.
     val allGlucoseLevels = glucoseLevels.allGlucoseLevels
     for (levels in allGlucoseLevels) {
@@ -82,10 +77,11 @@ fun GlucoseConfigurationScreen(glucoseLevels: IGlucoseLevels, glucoseRepository:
 @Composable
 fun GlucoseConfiguration(
     glucoseLevels: GlucoseLevels,
+    glucoseRepository: GlucoseRepository,
     onValuesChanged: (GlucoseLevels) -> Unit
 ) {
-    var newLevelMax by remember { mutableIntStateOf(glucoseLevels.levelMax) }
-    var newLevelMin by remember { mutableIntStateOf(glucoseLevels.levelMin) }
+    var newLevelMax by remember { mutableStateOf(glucoseLevels.levelMax) }
+    var newLevelMin by remember { mutableStateOf(glucoseLevels.levelMin) }
     var showMessage by remember { mutableStateOf(false) }
     var isOperationSuccessful by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
@@ -110,18 +106,18 @@ fun GlucoseConfiguration(
             "CONFIGURACIÓN DE LOS NIVELES",
             style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace)
         )
 
         Text(
             "Configuración nivel máximo: ",
             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace)
         )
 
         Box(modifier = Modifier
-            .fillMaxWidth(0.6f) //Ocupa el 80% del ancho disponible.
+            .fillMaxWidth(0.6f)
             .padding(horizontal = 16.dp)) {
             GlucoseInput(
                 glucoseValue = newLevelMax,
@@ -136,7 +132,7 @@ fun GlucoseConfiguration(
             "Configuración nivel mínimo: ",
             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.padding(bottom = paddingSpace) //Espacio inferior.
+            modifier = Modifier.padding(bottom = paddingSpace)
         )
 
         Box(modifier = Modifier
@@ -151,18 +147,26 @@ fun GlucoseConfiguration(
             )
         }
 
-        //Separación adicional solo para el botón.
         Spacer(modifier = Modifier.height(paddingSpace))
 
-        //Botón para confirmar los cambios
         Button(
             onClick = {
                 try {
-                    glucoseLevels.levelMax = newLevelMax
-                    glucoseLevels.levelMin = newLevelMin
+                    // Crear una nueva instancia de GlucoseLevels con los valores actualizados
+                    val updatedLevels = GlucoseLevels(newLevelMax, newLevelMin).apply {
+                        id = glucoseLevels.id // Si es necesario
+                    }
+
                     Log.d("GlucoseConfiguration", "Intentando guardar - Max: $newLevelMax, Min: $newLevelMin")
-                    glucoseLevels.setLevels(newLevelMax, newLevelMin)
-                    onValuesChanged(glucoseLevels)
+
+                    val glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
+                    glucoseLevelsImp.updateLevels(updatedLevels)
+
+                    isOperationSuccessful = glucoseLevelsImp.isLevelSuccess
+                    message = if (isOperationSuccessful) "Valores añadidos correctamente" else "ERROR: Valores no añadidos"
+                    Log.d("GlucoseConfiguration", "Update Result - Success: $isOperationSuccessful, Message: $message")
+
+                    onValuesChanged(updatedLevels)
                 } catch (e: IllegalArgumentException) {
                     isOperationSuccessful = false
                     message = e.message ?: "Error desconocido"
@@ -171,16 +175,17 @@ fun GlucoseConfiguration(
                 showMessage = true
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
-                .width(200.dp) //ancho del botón.
-                .height(50.dp) //alto del botón.
-                .clip(CutCornerShape(20.dp, 20.dp, 20.dp, 20.dp)), //botón romboide
-            colors = ButtonDefaults.buttonColors(SoftYellow)
+                .width(200.dp)
+                .height(50.dp)
+                .clip(CutCornerShape(20.dp, 20.dp, 20.dp, 20.dp)),
+            colors = ButtonDefaults.buttonColors(Color.Yellow) // Cambiar a SoftYellow si está definido en otro lugar.
         ) {
             Text("Guardar cambios", style = TextStyle(fontSize = 18.sp))
         }
-        // Muestra el mensaje de confirmación o error.
+
         if (showMessage) {
             SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isOperationSuccessful, message = message)
         }
     }
 }
+

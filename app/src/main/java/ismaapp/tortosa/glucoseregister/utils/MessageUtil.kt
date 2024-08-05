@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftGreen
+import ismaapp.tortosa.glucoseregister.ui.theme.SoftRed
 
 @Composable
 fun SuccessfulMessage(
@@ -34,9 +36,7 @@ fun SuccessfulMessage(
         if (showMessage) {
             //Muestra el mensaje.
             val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
-            val color = if (isMeasurementSuccessful) Color.Green else Color.Red
-
-            Log.d("SuccessfulMessage", "Showing message: $message, Success: $isMeasurementSuccessful")
+            val color = if (isMeasurementSuccessful) SoftGreen else SoftRed
 
             Row(
                 modifier = Modifier
