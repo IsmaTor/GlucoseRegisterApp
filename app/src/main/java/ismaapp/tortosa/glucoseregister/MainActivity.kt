@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.Manifest
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var printService: IPrintService
     private lateinit var glucoseLevelsImp: IGlucoseLevels
     private lateinit var glucoseLevels: GlucoseLevels
+    private lateinit var databaseLevels: SQLiteDatabase
 
     private var orderByLatest by mutableStateOf(true)
     private var orderByOldest by mutableStateOf(true)
@@ -56,34 +58,45 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        databaseGlucose = GlucoseDBHelper(this).writableDatabase
-        glucoseRepository = GlucoseRepository(databaseGlucose)
-        glucoseService = GlucoseServiceImp(glucoseRepository)
-        printService = PrintServiceImp(glucoseService)
-        glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
-        glucoseLevels = glucoseLevelsImp.levels
+        try {
+            Log.d("MainActivity", "Initializing database")
+            val dbHelper = GlucoseDBHelper(this)
+            databaseGlucose = dbHelper.writableDatabase
+            Log.d("MainActivity", "Database initialized")
 
-        val dbHelper = GlucoseDBHelper(this)
-        dbHelper.createTablesIfNotExists(databaseGlucose)
+            checkTableExists()
 
-        // Verificar que la tabla 'levels' se ha creado correctamente
-        if (isTableExists(databaseGlucose, GlucoseDBHelper.LEVELS_TABLE_NAME)) {
-            Log.d("MainActivity", "La tabla 'levels' existe.")
-        } else {
-            Log.e("MainActivity", "La tabla 'levels' no existe.")
-        }
+            glucoseRepository = GlucoseRepository(databaseGlucose)
+            glucoseService = GlucoseServiceImp(glucoseRepository)
+            printService = PrintServiceImp(glucoseService)
+            glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
 
-        // Insertar valores iniciales solo si no existen
-        if (glucoseLevelsImp.levels == null) {
-            val initialLevels = GlucoseLevels(130, 80)
-            glucoseRepository.insertInitialLevels(initialLevels)
+            // Verificar si los niveles existen y, si no, insertarlos
+            if (glucoseLevelsImp.levels == null) {
+                val initialLevels = GlucoseLevels(130, 80)
+                glucoseRepository.insertInitialLevels(initialLevels)
+                Log.d("MainActivity", "Initial levels inserted")
+            }
+
+            // Recuperar niveles después de la inserción
+            glucoseLevels = glucoseLevelsImp.levels
+
+            if (glucoseLevels != null) {
+                Log.d("MainActivity", "Retrieved levels: Max=${glucoseLevels.levelMax}, Min=${glucoseLevels.levelMin}")
+            } else {
+                Log.e("MainActivity", "Failed to retrieve levels after insertion.")
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error initializing database: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("MainActivity", "Error initializing database: ${e.message}")
         }
 
         setContent {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
-
                         Image(
                             painter = painterResource(id = R.drawable.wallpaper),
                             contentDescription = null,
@@ -142,7 +155,7 @@ class MainActivity : ComponentActivity() {
                                 val intervalHours = navBackStackEntry.arguments?.getString("intervalHours")?.toInt() ?: 0
                                 Surface(
                                     color = Color.DarkGray
-                                    ) {
+                                ) {
                                     GraphicDetailScreen(glucoseService, glucoseLevels, intervalHours, onNavigateBack = {
                                         navController.popBackStack()
                                     })
@@ -196,4 +209,12 @@ class MainActivity : ComponentActivity() {
         return exists
     }
 
+    private fun checkTableExists() {
+        if (isTableExists(databaseGlucose, GlucoseDBHelper.LEVELS_TABLE_NAME)) {
+            Log.d("MainActivity", "La tabla 'levels' existe.");
+        } else {
+            Log.e("MainActivity", "La tabla 'levels' no existe.");
+        }
+    }
 }
+
