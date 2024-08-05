@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftGreen
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftRed
@@ -48,7 +50,7 @@ fun SuccessfulMessage(
             ) {
                 Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(message, color = Color.White)
+                Text(message, color = Color.White, style = TextStyle(fontSize = 20.sp)) //mensaje, color y tamaño.
             }
         } else {
             Log.d("SuccessfulMessage", "No message to show.")
