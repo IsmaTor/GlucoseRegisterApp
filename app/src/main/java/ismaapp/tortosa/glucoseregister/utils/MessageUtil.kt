@@ -50,7 +50,7 @@ fun SuccessfulMessage(
             ) {
                 Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(message, color = Color.White, style = TextStyle(fontSize = 20.sp)) //mensaje, color y tamaño.
+                Text(message, color = Color.White, style = TextStyle(fontSize = 19.sp)) //mensaje, color y tamaño.
             }
         } else {
             Log.d("SuccessfulMessage", "No message to show.")

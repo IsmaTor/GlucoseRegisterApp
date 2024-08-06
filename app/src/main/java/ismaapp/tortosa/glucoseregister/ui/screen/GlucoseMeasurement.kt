@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -51,16 +49,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import ismaapp.tortosa.glucoseregister.repository.GlucoseRepository
 import ismaapp.tortosa.glucoseregister.services.GlucoseLevelsImp
 import ismaapp.tortosa.glucoseregister.services.IGlucoseService
 import ismaapp.tortosa.glucoseregister.ui.theme.BackgroundGrey
-import ismaapp.tortosa.glucoseregister.ui.theme.DarkRed
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftYellow
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftGreen
 import ismaapp.tortosa.glucoseregister.ui.theme.SoftRed
+import ismaapp.tortosa.glucoseregister.utils.SuccessfulMessage
 import kotlinx.coroutines.delay
 
 @Composable
@@ -156,27 +153,11 @@ fun GlucoseMeasurementScreen(
                 .padding(8.dp)
         ) {
             if (showMessage) {
-                // Muestra el mensaje.
-                val icon = if (isMeasurementSuccessful) Icons.Default.Check else Icons.Default.Clear
-                val color = if (isMeasurementSuccessful) SoftGreen else DarkRed
-
-                Row(
-                    modifier = Modifier
-                        .background(color)
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .zIndex(1f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(icon, contentDescription = "successfulMessage", tint = Color.White)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(message, color = Color.White)
-                }
+                SuccessfulMessage(showMessage = showMessage, isMeasurementSuccessful = isMeasurementSuccessful, message = message)
             }
             // Muestra la última medición
             LastMeasure(lastMeasurement = lastMeasurement, glucoseRepository = glucoseRepository)
         }
-
     }
 }
 
@@ -208,12 +189,12 @@ fun ButtonsHome(
                 val isInsertSuccessful = glucoseService.isDeleteSuccess
 
                 if (isInsertSuccessful) {
-                    onMeasurementRegistered(true, "Medición registrada correctamente", 0)
+                    onMeasurementRegistered(true, "Medición registrada", 0)
 
                     val updatedLastMeasurement = glucoseService.lastGlucoseMeasurement
                     onLastMeasurementUpdated(updatedLastMeasurement)
                 } else {
-                    onMeasurementRegistered(false, "Medición no registrada correctamente", glucoseValue)
+                    onMeasurementRegistered(false, "Medición no registrada", glucoseValue)
                 }
                 keyboardController?.hide()
             },
