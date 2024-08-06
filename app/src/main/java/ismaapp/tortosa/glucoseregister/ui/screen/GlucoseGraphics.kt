@@ -171,7 +171,8 @@ fun GraphicDetailScreen(
         ) {
             Button(
                 onClick = { onNavigateBack() },
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
+                colors = ButtonDefaults.buttonColors(SoftYellow)
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Text("Volver")

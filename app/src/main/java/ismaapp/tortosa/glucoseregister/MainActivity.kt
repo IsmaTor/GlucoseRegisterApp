@@ -56,34 +56,33 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        databaseGlucose = GlucoseDBHelper(this).writableDatabase
-        glucoseRepository = GlucoseRepository(databaseGlucose)
-        glucoseService = GlucoseServiceImp(glucoseRepository)
-        printService = PrintServiceImp(glucoseService)
-        glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
-        glucoseLevels = glucoseLevelsImp.levels
+        try {
+            val dbHelper = GlucoseDBHelper(this)
+            databaseGlucose = dbHelper.writableDatabase
 
-        val dbHelper = GlucoseDBHelper(this)
-        dbHelper.createTablesIfNotExists(databaseGlucose)
+            glucoseRepository = GlucoseRepository(databaseGlucose)
+            glucoseService = GlucoseServiceImp(glucoseRepository)
+            printService = PrintServiceImp(glucoseService)
+            glucoseLevelsImp = GlucoseLevelsImp(glucoseRepository)
 
-        // Verificar que la tabla 'levels' se ha creado correctamente
-        if (isTableExists(databaseGlucose, GlucoseDBHelper.LEVELS_TABLE_NAME)) {
-            Log.d("MainActivity", "La tabla 'levels' existe.")
-        } else {
-            Log.e("MainActivity", "La tabla 'levels' no existe.")
-        }
+            //Insertar valores iniciales solo si no existen.
+            if (glucoseLevelsImp.levels == null) {
+                val initialLevels = GlucoseLevels(130, 80)
+                glucoseRepository.insertInitialLevels(initialLevels)
+            }
 
-        // Insertar valores iniciales solo si no existen
-        if (glucoseLevelsImp.levels == null) {
-            val initialLevels = GlucoseLevels(130, 80)
-            glucoseRepository.insertInitialLevels(initialLevels)
+            //Recuperar niveles después de insertarlos
+            glucoseLevels = glucoseLevelsImp.levels
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("MainActivity", "Error initializing database: ${e.message}")
         }
 
         setContent {
             MaterialTheme {
                 LoadingScreen(onLoadingComplete = {
                     setContent {
-
                         Image(
                             painter = painterResource(id = R.drawable.wallpaper),
                             contentDescription = null,
@@ -142,7 +141,7 @@ class MainActivity : ComponentActivity() {
                                 val intervalHours = navBackStackEntry.arguments?.getString("intervalHours")?.toInt() ?: 0
                                 Surface(
                                     color = Color.DarkGray
-                                    ) {
+                                ) {
                                     GraphicDetailScreen(glucoseService, glucoseLevels, intervalHours, onNavigateBack = {
                                         navController.popBackStack()
                                     })
@@ -188,12 +187,5 @@ class MainActivity : ComponentActivity() {
     companion object {
         private const val REQUEST_DOWNLOAD_PERMISSION_CODE = 100
     }
-
-    private fun isTableExists(db: SQLiteDatabase, tableName: String): Boolean {
-        val cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name=?", arrayOf(tableName))
-        val exists = cursor.count > 0
-        cursor.close()
-        return exists
-    }
-
 }
+
